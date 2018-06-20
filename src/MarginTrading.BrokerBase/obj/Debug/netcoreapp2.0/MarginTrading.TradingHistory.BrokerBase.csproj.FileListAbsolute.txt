@@ -1,0 +1,14 @@
+/Users/isailen/_Projects/MarginTrading.TradingHistory/src/MarginTrading.TradingHistory.BrokerBase/bin/Debug/netcoreapp2.0/MarginTrading.TradingHistory.BrokerBase.deps.json
+/Users/isailen/_Projects/MarginTrading.TradingHistory/src/MarginTrading.TradingHistory.BrokerBase/bin/Debug/netcoreapp2.0/MarginTrading.TradingHistory.BrokerBase.dll
+/Users/isailen/_Projects/MarginTrading.TradingHistory/src/MarginTrading.TradingHistory.BrokerBase/bin/Debug/netcoreapp2.0/MarginTrading.TradingHistory.BrokerBase.pdb
+/Users/isailen/_Projects/MarginTrading.TradingHistory/src/MarginTrading.TradingHistory.BrokerBase/bin/Debug/netcoreapp2.0/MarginTrading.TradingHistory.Core.dll
+/Users/isailen/_Projects/MarginTrading.TradingHistory/src/MarginTrading.TradingHistory.BrokerBase/bin/Debug/netcoreapp2.0/MarginTrading.TradingHistory.Services.dll
+/Users/isailen/_Projects/MarginTrading.TradingHistory/src/MarginTrading.TradingHistory.BrokerBase/bin/Debug/netcoreapp2.0/MarginTrading.TradingHistory.Core.pdb
+/Users/isailen/_Projects/MarginTrading.TradingHistory/src/MarginTrading.TradingHistory.BrokerBase/bin/Debug/netcoreapp2.0/MarginTrading.TradingHistory.Services.pdb
+/Users/isailen/_Projects/MarginTrading.TradingHistory/src/MarginTrading.TradingHistory.BrokerBase/obj/Debug/netcoreapp2.0/MarginTrading.TradingHistory.BrokerBase.csprojAssemblyReference.cache
+/Users/isailen/_Projects/MarginTrading.TradingHistory/src/MarginTrading.TradingHistory.BrokerBase/obj/Debug/netcoreapp2.0/MarginTrading.TradingHistory.BrokerBase.csproj.CoreCompileInputs.cache
+/Users/isailen/_Projects/MarginTrading.TradingHistory/src/MarginTrading.TradingHistory.BrokerBase/obj/Debug/netcoreapp2.0/MarginTrading.TradingHistory.BrokerBase.AssemblyInfoInputs.cache
+/Users/isailen/_Projects/MarginTrading.TradingHistory/src/MarginTrading.TradingHistory.BrokerBase/obj/Debug/netcoreapp2.0/MarginTrading.TradingHistory.BrokerBase.AssemblyInfo.cs
+/Users/isailen/_Projects/MarginTrading.TradingHistory/src/MarginTrading.TradingHistory.BrokerBase/obj/Debug/netcoreapp2.0/MarginTrading.TradingHistory.BrokerBase.csproj.CopyComplete
+/Users/isailen/_Projects/MarginTrading.TradingHistory/src/MarginTrading.TradingHistory.BrokerBase/obj/Debug/netcoreapp2.0/MarginTrading.TradingHistory.BrokerBase.dll
+/Users/isailen/_Projects/MarginTrading.TradingHistory/src/MarginTrading.TradingHistory.BrokerBase/obj/Debug/netcoreapp2.0/MarginTrading.TradingHistory.BrokerBase.pdb

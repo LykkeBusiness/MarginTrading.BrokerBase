@@ -1,0 +1,605 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="b57449c2-7c56-49e9-ab25-49387766dc43" name="Default" comment="" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf />
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>MarginTrading.TradingHistory.Core</find>
+    </findStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/ConfigurationBuilderExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Extensions/QueueHelper.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Extensions/ValidationExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Settings/BrokerSettingsBase.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Models/StorageMode.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Services/IConvertService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Services/Implementation/ConvertService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Entities/LogEntity.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Extensions/SqlExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Models/LogLevel.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Controllers/IsAliveController.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Services/Implementation/LogToSql.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Entities/ILogEntity.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/BrokerStartupBase.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Repositories/ILogRepository.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/BrokerApplicationBase.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Services/Implementation/MtSlackNotificationsSender.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Repositories/Implementation/SqlLogRepository.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Models/ChannelTypes.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Services/IMtSlackNotificationsSender.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Settings/IBrokerApplicationSettings.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Settings/DefaultBrokerApplicationSettings.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Settings/BrokersLogsSettings.cs" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/MarginTrading.BrokerBase.Core/Class1.cs" />
+        <option value="$PROJECT_DIR$/MarginTrading.BrokerBase.Core/StorageMode.cs" />
+        <option value="$PROJECT_DIR$/src/MarginTrading.BrokerBase/MarginTrading.BrokerBase.csproj" />
+        <option value="$PROJECT_DIR$/src/MarginTrading.BrokerBase/Settings/BrokerSettingsBase.cs" />
+        <option value="$PROJECT_DIR$/src/MarginTrading.BrokerBase/Settings/BrokersLogsSettings.cs" />
+        <option value="$PROJECT_DIR$/src/MarginTrading.BrokerBase/Settings/BrokerSettingsRoot.cs" />
+        <option value="$PROJECT_DIR$/src/MarginTrading.BrokerBase/ConfigurationBuilderExtensions.cs" />
+        <option value="$PROJECT_DIR$/src/MarginTrading.BrokerBase/Services/IMtSlackNotificationsSender.cs" />
+        <option value="$PROJECT_DIR$/src/MarginTrading.BrokerBase/Models/ChannelTypes.cs" />
+        <option value="$PROJECT_DIR$/src/MarginTrading.BrokerBase/Services/Implementation/MtSlackNotificationsSender.cs" />
+        <option value="$PROJECT_DIR$/src/MarginTrading.BrokerBase/Entities/ILogEntity.cs" />
+        <option value="$PROJECT_DIR$/src/MarginTrading.BrokerBase/Repositories/ILogRepository.cs" />
+        <option value="$PROJECT_DIR$/src/MarginTrading.BrokerBase/Repositories/Implementation/SqlLogRepository.cs" />
+        <option value="$PROJECT_DIR$/src/MarginTrading.BrokerBase/Models/LogLevel.cs" />
+        <option value="$PROJECT_DIR$/src/MarginTrading.BrokerBase/Entities/LogEntity.cs" />
+        <option value="$PROJECT_DIR$/src/MarginTrading.BrokerBase/Services/Implementation/LogToSql.cs" />
+        <option value="$PROJECT_DIR$/src/MarginTrading.BrokerBase/Services/IConvertService.cs" />
+        <option value="$PROJECT_DIR$/src/MarginTrading.BrokerBase/Services/Implementation/ConvertService.cs" />
+        <option value="$PROJECT_DIR$/src/MarginTrading.BrokerBase/ValidationExtensions.cs" />
+        <option value="$PROJECT_DIR$/src/MarginTrading.BrokerBase/SqlExtensions.cs" />
+        <option value="$PROJECT_DIR$/src/MarginTrading.BrokerBase/Extensions/QueueHelper.cs" />
+        <option value="$PROJECT_DIR$/src/MarginTrading.BrokerBase/BrokerApplicationBase.cs" />
+        <option value="$PROJECT_DIR$/src/MarginTrading.BrokerBase/Settings/IBrokerApplicationSettings.cs" />
+        <option value="$PROJECT_DIR$/src/MarginTrading.BrokerBase/Settings/DefaultBrokerApplicationSettings.cs" />
+        <option value="$PROJECT_DIR$/src/MarginTrading.BrokerBase/BrokerStartupBase.cs" />
+      </list>
+    </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
+  </component>
+  <component name="NodePackageJsonFileManager">
+    <packageJsonPaths />
+  </component>
+  <component name="ProjectFrameBounds">
+    <option name="x" value="56" />
+    <option name="y" value="23" />
+    <option name="width" value="1621" />
+    <option name="height" value="995" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectView">
+    <navigator currentView="SolutionExplorer" proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="Scratches" />
+      <pane id="SolutionExplorer">
+        <subPane>
+          <expand>
+            <path>
+              <item name="" type="13324e5d:SolutionExplorerViewPane$ProjectViewPaneTreeStructure$createRoot$1" />
+              <item name="MarginTrading.BrokerBase (1 project)" type="977d5f41:SolutionExplorerNodeRider" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+        <option name="show-file-system" value="false" />
+        <option name="show-all-items" value="false" />
+      </pane>
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="Rider.ProjectViewActivator.IsNotFirstRun" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="b57449c2-7c56-49e9-ab25-49387766dc43" name="Default" comment="" />
+      <created>1529494272338</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1529494272338</updated>
+      <workItem from="1529494274052" duration="39000" />
+      <workItem from="1529494330606" duration="2524000" />
+      <workItem from="1529505374082" duration="34000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="2597000" />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="56" y="23" width="1621" height="995" extended-state="0" />
+    <layout>
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="right" id="Errors In Solution" order="3" />
+      <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
+      <window_info anchor="bottom" id="Unit Tests" order="7" />
+      <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Run" order="2" />
+      <window_info anchor="bottom" id="Version Control" order="7" />
+      <window_info anchor="bottom" id="Terminal" order="7" />
+      <window_info anchor="bottom" id="NuGet" order="7" weight="0.32899022" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24984577" />
+      <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
+      <window_info anchor="right" id="Database" order="3" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32899022" />
+    </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <ignored-roots>
+      <path value="$PROJECT_DIR$/.." />
+    </ignored-roots>
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/MarginTrading.BrokerBase.Core/Class1.cs" />
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Models/StorageMode.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="21" selection-start-column="21" selection-end-column="21" />
+          <folding>
+            <marker date="1529494622669" expanded="true" signature="71:125" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Controllers/IsAliveController.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <marker date="1529494622609" expanded="false" signature="6:72" ph="..." />
+            <marker date="1529494622609" expanded="true" signature="120:699" ph="{...}" />
+            <marker date="1529494622609" expanded="true" signature="202:697" ph="{...}" />
+            <marker date="1529494622609" expanded="true" signature="348:416" ph="{...}" />
+            <marker date="1529494622609" expanded="true" signature="470:691" ph="{...}" />
+            <marker date="1529494622609" expanded="true" signature="507:679" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/ConfigurationBuilderExtensions.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="19" column="1" lean-forward="true" selection-start-line="19" selection-start-column="1" selection-end-line="19" selection-end-column="1" />
+          <folding>
+            <marker date="1529494712544" expanded="true" signature="6:157" ph="..." />
+            <marker date="1529494712544" expanded="true" signature="271:620" ph="{...}" />
+            <marker date="1529494712544" expanded="true" signature="393:614" ph="{...}" />
+            <marker date="1529494712544" expanded="true" signature="496:602" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Services/IMtSlackNotificationsSender.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="8" column="5" selection-start-line="8" selection-start-column="5" selection-end-line="8" selection-end-column="5" />
+          <folding>
+            <marker date="1529494890280" expanded="true" signature="6:61" ph="..." />
+            <marker date="1529494890280" expanded="true" signature="185:268" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Models/ChannelTypes.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="11" column="5" selection-start-line="11" selection-start-column="5" selection-end-line="11" selection-end-column="5" />
+          <folding>
+            <marker date="1529494918375" expanded="true" signature="6:56" ph="..." />
+            <marker date="1529494918375" expanded="true" signature="187:318" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Services/Implementation/MtSlackNotificationsSender.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="534">
+          <caret line="42" column="44" selection-start-line="42" selection-start-column="44" selection-end-line="42" selection-end-column="44" />
+          <folding>
+            <marker date="1529495053076" expanded="true" signature="6:133" ph="..." />
+            <marker date="1529495053076" expanded="true" signature="193:2211" ph="{...}" />
+            <marker date="1529495053076" expanded="true" signature="269:2209" ph="{...}" />
+            <marker date="1529495053076" expanded="true" signature="520:626" ph="{...}" />
+            <marker date="1529495053076" expanded="true" signature="707:1105" ph="{...}" />
+            <marker date="1529495053076" expanded="true" signature="883:999" ph="{...}" />
+            <marker date="1529495053076" expanded="true" signature="1202:1604" ph="{...}" />
+            <marker date="1529495053076" expanded="true" signature="1366:1490" ph="{...}" />
+            <marker date="1529495053076" expanded="true" signature="1682:1786" ph="{...}" />
+            <marker date="1529495053076" expanded="true" signature="1838:2203" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Entities/ILogEntity.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="289">
+          <caret line="17" selection-start-line="17" selection-end-line="17" />
+          <folding>
+            <marker date="1529495231246" expanded="true" signature="92:501" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Repositories/ILogRepository.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="119">
+          <caret line="7" column="30" selection-start-line="7" selection-start-column="30" selection-end-line="7" selection-end-column="30" />
+          <folding>
+            <marker date="1529495236034" expanded="true" signature="6:70" ph="..." />
+            <marker date="1529495236034" expanded="true" signature="157:206" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Repositories/Implementation/SqlLogRepository.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="935">
+          <caret line="55" column="1" selection-start-line="55" selection-start-column="1" selection-end-line="55" selection-end-column="1" />
+          <folding>
+            <marker date="1529495260854" expanded="true" signature="6:146" ph="..." />
+            <marker date="1529495260854" expanded="true" signature="263:2669" ph="{...}" />
+            <marker date="1529495260854" expanded="true" signature="2060:2357" ph="{...}" />
+            <marker date="1529495260854" expanded="true" signature="2240:2347" ph="{...}" />
+            <marker date="1529495260854" expanded="true" signature="2415:2663" ph="{...}" />
+            <marker date="1529495260854" expanded="true" signature="2493:2653" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Models/LogLevel.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="238">
+          <caret line="14" column="5" selection-start-line="14" selection-start-column="5" selection-end-line="14" selection-end-column="5" />
+          <folding>
+            <marker date="1529495332730" expanded="true" signature="95:324" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Entities/LogEntity.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="18" column="1" selection-start-line="18" selection-start-column="1" selection-end-line="18" selection-end-column="1" />
+          <folding>
+            <marker date="1529495356350" expanded="true" signature="100:586" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Services/Implementation/LogToSql.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="374">
+          <caret line="22" column="35" selection-start-line="22" selection-start-column="35" selection-end-line="22" selection-end-column="35" />
+          <folding>
+            <marker date="1529495368460" expanded="true" signature="6:235" ph="..." />
+            <marker date="1529495368460" expanded="true" signature="330:5155" ph="{...}" />
+            <marker date="1529495368460" expanded="true" signature="447:511" ph="{...}" />
+            <marker date="1529495368460" expanded="true" signature="688:1429" ph="{...}" />
+            <marker date="1529495368460" expanded="true" signature="747:1359" ph="{...}" />
+            <marker date="1529495368460" expanded="true" signature="1569:1683" ph="{...}" />
+            <marker date="1529495368460" expanded="true" signature="1818:1938" ph="{...}" />
+            <marker date="1529495368460" expanded="true" signature="2073:2190" ph="{...}" />
+            <marker date="1529495368460" expanded="true" signature="2351:2466" ph="{...}" />
+            <marker date="1529495368460" expanded="true" signature="2607:2727" ph="{...}" />
+            <marker date="1529495368460" expanded="true" signature="2885:3010" ph="{...}" />
+            <marker date="1529495368460" expanded="true" signature="3124:3233" ph="{...}" />
+            <marker date="1529495368460" expanded="true" signature="3350:3465" ph="{...}" />
+            <marker date="1529495368460" expanded="true" signature="3582:3694" ph="{...}" />
+            <marker date="1529495368460" expanded="true" signature="3825:3935" ph="{...}" />
+            <marker date="1529495368460" expanded="true" signature="4058:4173" ph="{...}" />
+            <marker date="1529495368460" expanded="true" signature="4301:4421" ph="{...}" />
+            <marker date="1529495368460" expanded="true" signature="4481:5149" ph="{...}" />
+            <marker date="1529495368460" expanded="true" signature="4520:4577" ph="{...}" />
+            <marker date="1529495368460" expanded="true" signature="4591:4926" ph="/* See: https://blogs.msdn.microsoft.com/avkashchauhan/2011/11/30/how-the-size-of-an-entity-is-caclulated-in-wind ... */" />
+            <marker date="1529495368460" expanded="true" signature="5012:5114" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Services/IConvertService.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="289">
+          <caret line="17" column="5" selection-start-line="17" selection-start-column="5" selection-end-line="17" selection-end-column="5" />
+          <folding>
+            <marker date="1529495418072" expanded="true" signature="6:31" ph="..." />
+            <marker date="1529495418072" expanded="true" signature="115:754" ph="{...}" />
+            <marker date="1529495418072" expanded="true" signature="314:646" ph="/// Convert object, specifying some of the ctor args of the &lt;typeparam name=&quot;TResult&quot;/&gt; ... " />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Extensions/ValidationExtensions.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1173">
+          <caret line="69" column="13" lean-forward="true" selection-start-line="69" selection-start-column="13" selection-end-line="69" selection-end-column="13" />
+          <folding>
+            <marker date="1529495513147" expanded="true" signature="6:160" ph="..." />
+            <marker date="1529495513147" expanded="true" signature="243:14380" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="473:648" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="514:611" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="867:1048" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="908:1005" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="1277:1471" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="1337:1434" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="1695:1884" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="1750:1847" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="2117:2579" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="2158:2255" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="2325:2542" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="2419:2528" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="2834:3032" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="2897:2994" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="3287:3603" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="3407:3504" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="3772:4142" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="3821:3879" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="3927:4060" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="4315:4690" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="4365:4423" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="4471:4608" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="4958:5140" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="4999:5103" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="5410:5618" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="5471:5581" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="5832:6226" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="5889:5947" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="5995:6144" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="6486:6671" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="6527:6634" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="6932:7143" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="6993:7106" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="7348:7729" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="7406:7464" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="7512:7647" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="8001:8186" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="8042:8149" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="8459:8670" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="8520:8633" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="8887:9285" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="8945:9248" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="9010:9158" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="9548:9736" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="9589:9699" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="10000:10214" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="10061:10177" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="10422:10807" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="10480:10538" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="10586:10725" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="11070:11256" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="11111:11219" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="11533:12144" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="11574:11631" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="11686:11806" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="11845:11958" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="11997:12107" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="12344:12782" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="12436:12494" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="12542:12700" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="13022:13190" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="13063:13153" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="13375:13790" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="13454:13512" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="13560:13708" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="14014:14374" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="14056:14113" ph="{...}" />
+            <marker date="1529495513147" expanded="true" signature="14217:14275" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Services/Implementation/ConvertService.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1020">
+          <caret line="60" selection-start-line="60" selection-end-line="60" />
+          <folding>
+            <marker date="1529495487499" expanded="true" signature="6:167" ph="..." />
+            <marker date="1529495487499" expanded="true" signature="227:2218" ph="{...}" />
+            <marker date="1529495487499" expanded="true" signature="300:2216" ph="{...}" />
+            <marker date="1529495487499" expanded="true" signature="596:687" ph="{...}" />
+            <marker date="1529495487499" expanded="true" signature="822:888" ph="{...}" />
+            <marker date="1529495487499" expanded="true" signature="997:1767" ph="{...}" />
+            <marker date="1529495487499" expanded="true" signature="1395:1755" ph="{...}" />
+            <marker date="1529495487499" expanded="true" signature="1502:1741" ph="{...}" />
+            <marker date="1529495487499" expanded="true" signature="1833:1911" ph="{...}" />
+            <marker date="1529495487499" expanded="true" signature="1921:2055" ph="/// Get the properties and values of an object using an existing opimized implementation  ... " />
+            <marker date="1529495487499" expanded="true" signature="2140:2210" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Extensions/SqlExtensions.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="68">
+          <caret line="6" column="32" selection-start-line="6" selection-start-column="32" selection-end-line="6" selection-end-column="32" />
+          <folding>
+            <marker date="1529495513146" expanded="false" signature="6:61" ph="..." />
+            <marker date="1529495513146" expanded="true" signature="97:784" ph="{...}" />
+            <marker date="1529495513146" expanded="true" signature="137:782" ph="{...}" />
+            <marker date="1529495513146" expanded="true" signature="277:776" ph="{...}" />
+            <marker date="1529495513146" expanded="true" signature="334:481" ph="{...}" />
+            <marker date="1529495513146" expanded="true" signature="514:682" ph="{...}" />
+            <marker date="1529495513146" expanded="true" signature="702:766" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Extensions/QueueHelper.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="11" column="5" selection-start-line="11" selection-start-column="5" selection-end-line="11" selection-end-column="5" />
+          <folding>
+            <marker date="1529495555226" expanded="true" signature="122:392" ph="{...}" />
+            <marker date="1529495555226" expanded="true" signature="226:386" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Settings/BrokerSettingsRoot.cs" />
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Settings/BrokerSettingsBase.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="68">
+          <caret line="4" column="17" selection-start-line="4" selection-start-column="17" selection-end-line="4" selection-end-column="17" />
+          <folding>
+            <marker date="1529494622611" expanded="true" signature="121:249" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Settings/BrokersLogsSettings.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="8" column="22" selection-start-line="8" selection-start-column="22" selection-end-line="8" selection-end-column="22" />
+          <folding>
+            <marker date="1529494656440" expanded="true" signature="122:245" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Settings/DefaultBrokerApplicationSettings.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="12" column="62" selection-start-line="12" selection-start-column="62" selection-end-line="12" selection-end-column="62" />
+          <folding>
+            <marker date="1529495906524" expanded="false" signature="6:67" ph="..." />
+            <marker date="1529495906524" expanded="true" signature="112:567" ph="{...}" />
+            <marker date="1529495906524" expanded="true" signature="276:565" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/Settings/IBrokerApplicationSettings.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="6" column="39" selection-start-line="6" selection-start-column="39" selection-end-line="6" selection-end-column="39" />
+          <folding>
+            <marker date="1529495773272" expanded="false" signature="6:67" ph="..." />
+            <marker date="1529495773272" expanded="true" signature="112:496" ph="{...}" />
+            <marker date="1529495773272" expanded="true" signature="231:494" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/BrokerStartupBase.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2204">
+          <caret line="166" column="21" selection-start-line="166" selection-start-column="21" selection-end-line="166" selection-end-column="21" />
+          <folding>
+            <marker date="1529495906521" expanded="false" signature="6:769" ph="..." />
+            <marker date="1529495906521" expanded="true" signature="805:7541" ph="{...}" />
+            <marker date="1529495906521" expanded="true" signature="1010:7539" ph="{...}" />
+            <marker date="1529495906521" expanded="true" signature="1366:1637" ph="{...}" />
+            <marker date="1529495906521" expanded="true" signature="1717:2767" ph="{...}" />
+            <marker date="1529495906521" expanded="true" signature="2154:2512" ph="{...}" />
+            <marker date="1529495906521" expanded="true" signature="2296:2401" ph="{...}" />
+            <marker date="1529495906521" expanded="true" signature="2868:2943" ph="{...}" />
+            <marker date="1529495906521" expanded="true" signature="3108:4092" ph="{...}" />
+            <marker date="1529495906521" expanded="true" signature="3300:3543" ph="{...}" />
+            <marker date="1529495906521" expanded="true" signature="3372:3447" ph="{...}" />
+            <marker date="1529495906521" expanded="true" signature="3605:3778" ph="{...}" />
+            <marker date="1529495906521" expanded="true" signature="3677:3764" ph="{...}" />
+            <marker date="1529495906521" expanded="true" signature="3845:4080" ph="{...}" />
+            <marker date="1529495906521" expanded="true" signature="3892:4001" ph="{...}" />
+            <marker date="1529495906521" expanded="true" signature="4435:6426" ph="{...}" />
+            <marker date="1529495906521" expanded="true" signature="4742:4955" ph="{...}" />
+            <marker date="1529495906521" expanded="true" signature="5519:6379" ph="{...}" />
+            <marker date="1529495906521" expanded="true" signature="5727:6048" ph="{...}" />
+            <marker date="1529495906521" expanded="true" signature="6148:6365" ph="{...}" />
+            <marker date="1529495906521" expanded="true" signature="6594:7533" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/BrokerApplicationBase.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="744">
+          <caret line="78" column="57" selection-start-line="78" selection-start-column="57" selection-end-line="78" selection-end-column="57" />
+          <folding>
+            <marker date="1529495564270" expanded="false" signature="6:240" ph="..." />
+            <marker date="1529495564270" expanded="true" signature="276:3280" ph="{...}" />
+            <marker date="1529495564270" expanded="true" signature="357:3278" ph="{...}" />
+            <marker date="1529495564270" expanded="true" signature="878:1221" ph="{...}" />
+            <marker date="1529495564270" expanded="true" signature="953:1210" ph="{...}" />
+            <marker date="1529495564270" expanded="true" signature="1445:1608" ph="{...}" />
+            <marker date="1529495564270" expanded="true" signature="1643:2687" ph="{...}" />
+            <marker date="1529495564270" expanded="true" signature="1765:2458" ph="{...}" />
+            <marker date="1529495564270" expanded="true" signature="2491:2677" ph="{...}" />
+            <marker date="1529495564270" expanded="true" signature="2726:2944" ph="{...}" />
+            <marker date="1529495564270" expanded="true" signature="3011:3272" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/MarginTrading.BrokerBase/MarginTrading.BrokerBase.csproj">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="425">
+          <caret line="25" column="14" selection-start-line="25" selection-start-column="14" selection-end-line="25" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>
