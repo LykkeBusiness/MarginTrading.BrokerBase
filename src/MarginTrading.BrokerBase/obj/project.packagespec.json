@@ -1,0 +1,115 @@
+﻿{
+  "version": "1.0.1",
+  "restore": {
+    "projectUniqueName": "/Users/isailen/_Projects/MarginTrading.BrokerBase/src/MarginTrading.BrokerBase/MarginTrading.BrokerBase.csproj",
+    "projectName": "MarginTrading.BrokerBase",
+    "projectPath": "/Users/isailen/_Projects/MarginTrading.BrokerBase/src/MarginTrading.BrokerBase/MarginTrading.BrokerBase.csproj",
+    "outputPath": "/Users/isailen/_Projects/MarginTrading.BrokerBase/src/MarginTrading.BrokerBase/obj/",
+    "projectStyle": "PackageReference",
+    "fallbackFolders": [
+      "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
+    ],
+    "originalTargetFrameworks": [
+      "netcoreapp2.1"
+    ],
+    "frameworks": {
+      "netcoreapp2.1": {
+        "projectReferences": {}
+      }
+    },
+    "warningProperties": {
+      "warnAsError": [
+        "NU1605"
+      ]
+    }
+  },
+  "frameworks": {
+    "netcoreapp2.1": {
+      "dependencies": {
+        "AutoMapper": {
+          "target": "Package",
+          "version": "[7.0.1, )"
+        },
+        "Dapper": {
+          "target": "Package",
+          "version": "[1.50.5, )"
+        },
+        "Flurl.Http": {
+          "target": "Package",
+          "version": "[2.3.1, )"
+        },
+        "JetBrains.Annotations": {
+          "target": "Package",
+          "version": "[11.1.0, )"
+        },
+        "Lykke.Logs": {
+          "target": "Package",
+          "version": "[4.3.4, )"
+        },
+        "Lykke.MarginTrading.BackendSnow.Contracts": {
+          "target": "Package",
+          "version": "[1.1.0-beta02, )"
+        },
+        "Lykke.RabbitMqBroker": {
+          "target": "Package",
+          "version": "[7.0.1, )"
+        },
+        "Lykke.SettingsReader": {
+          "target": "Package",
+          "version": "[2.4.0, )"
+        },
+        "Lykke.SlackNotification.AzureQueue": {
+          "target": "Package",
+          "version": "[2.0.4, )"
+        },
+        "Lykke.SlackNotifications": {
+          "target": "Package",
+          "version": "[2.0.0, )"
+        },
+        "Microsoft.AspNetCore.ApplicationInsights.HostingStartup": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Microsoft.AspNetCore.Hosting": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Microsoft.AspNetCore.Mvc": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Microsoft.AspNetCore.Server.Kestrel": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Microsoft.Extensions.Configuration.Binder": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Microsoft.Extensions.Configuration.Json": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Microsoft.Extensions.Logging.Console": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Microsoft.Extensions.Logging.Debug": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Microsoft.NETCore.App": {
+          "suppressParent": "All",
+          "target": "Package",
+          "version": "[2.1.0, )",
+          "autoReferenced": true
+        }
+      },
+      "imports": [
+        "net461"
+      ],
+      "assetTargetFallback": true,
+      "warn": true
+    }
+  }
+}
