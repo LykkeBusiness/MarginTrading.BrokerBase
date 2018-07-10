@@ -9,7 +9,6 @@ namespace MarginTrading.BrokerBase.Settings
         [Optional, CanBeNull]
         SlackNotificationSettings SlackNotifications { get; }
         
-        [Optional, CanBeNull]
         BrokersLogsSettings MtBrokersLogs { get; set; }
         
         TBrokerSettings MtBrokerSettings { get; set; }

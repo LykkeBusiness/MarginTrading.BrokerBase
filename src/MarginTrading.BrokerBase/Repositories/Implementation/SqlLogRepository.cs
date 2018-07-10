@@ -17,10 +17,10 @@ namespace MarginTrading.BrokerBase.Repositories.Implementation
                                                  "[Env] [nvarchar] (64) NULL, " +
                                                  "[AppName] [nvarchar] (256) NULL, " +
                                                  "[Version] [nvarchar] (256) NULL, " +
-                                                 "[Component] [nvarchar] (256) NULL, " +
-                                                 "[Process] [nvarchar] (256) NULL, " +
-                                                 "[Context] [nvarchar] (256) NULL, " +
-                                                 "[Type] [nvarchar] (256) NULL, " +
+                                                 "[Component] [nvarchar] (MAX) NULL, " +
+                                                 "[Process] [nvarchar] (MAX) NULL, " +
+                                                 "[Context] [nvarchar] (MAX) NULL, " +
+                                                 "[Type] [nvarchar] (MAX) NULL, " +
                                                  "[Stack] [text] NULL, " +
                                                  "[Msg] [text] NULL " +
                                                  ");";
