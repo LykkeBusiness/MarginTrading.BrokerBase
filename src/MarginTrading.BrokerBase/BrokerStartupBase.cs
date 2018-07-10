@@ -2,7 +2,9 @@
 using System.IO;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using AzureStorage.Tables;
 using Common.Log;
+using Lykke.AzureQueueIntegration;
 using Lykke.Logs;
 using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
@@ -120,44 +122,66 @@ namespace MarginTrading.BrokerBase
         protected virtual ILog CreateLogWithSlack(IServiceCollection services,
             IReloadingManager<TApplicationSettings> settings, CurrentApplicationInfo applicationInfo)
         {
-            var logToConsole = new LogToConsole();
+            var logTableName = ApplicationName + applicationInfo.EnvInfo + "Log"; 
             var aggregateLogger = new AggregateLogger();
+            var consoleLogger = new LogToConsole();
+            
+            aggregateLogger.AddLog(consoleLogger);
 
-            aggregateLogger.AddLog(logToConsole);
+            IMtSlackNotificationsSender slackService = null;
 
-            ISlackNotificationsSender slackNotificationsSender = null;
             if (settings.CurrentValue.SlackNotifications != null)
             {
-                slackNotificationsSender = services.UseSlackNotificationsSenderViaAzureQueue(
-                    settings.CurrentValue.SlackNotifications.AzureQueue, aggregateLogger);
+                var azureQueue = new AzureQueueSettings
+                {
+                    ConnectionString = settings.CurrentValue.SlackNotifications.AzureQueue.ConnectionString,
+                    QueueName = settings.CurrentValue.SlackNotifications.AzureQueue.QueueName
+                };
+
+                var commonSlackService =
+                    services.UseSlackNotificationsSenderViaAzureQueue(azureQueue, consoleLogger);
+
+                slackService =
+                    new MtSlackNotificationsSender(commonSlackService, ApplicationName, Environment.EnvironmentName);
             }
-
-            var slackService =
-                new MtSlackNotificationsSender(slackNotificationsSender, ApplicationName, applicationInfo.EnvInfo);
-
-            services.AddSingleton<ISlackNotificationsSender>(slackService);
-
-            // Creating azure storage logger, which logs own messages to concole log
-            var dbLogConnectionString = settings.CurrentValue.MtBrokersLogs?.DbConnString;
-            if (!string.IsNullOrEmpty(dbLogConnectionString) &&
-                !(dbLogConnectionString.StartsWith("${") && dbLogConnectionString.EndsWith("}")))
+            else
             {
-                var logTableName = ApplicationName + applicationInfo.EnvInfo + "Log";
-                
-                if (settings.CurrentValue.MtBrokersLogs?.StorageMode == StorageMode.Azure)
-                {
-                    var logToAzureStorage = services.UseLogToAzureStorage(
-                        settings.Nested(s => s.MtBrokersLogs.DbConnString), slackService,
-                        logTableName, aggregateLogger);
+                slackService =
+                    new MtSlackNotificationsSenderLogStub(ApplicationName, Environment.EnvironmentName, consoleLogger);
+            }
+            
+            services.AddSingleton<ISlackNotificationsSender>(slackService);
+            services.AddSingleton<IMtSlackNotificationsSender>(slackService);
 
-                    aggregateLogger.AddLog(logToAzureStorage);
-                }
-                else if (settings.CurrentValue.MtBrokersLogs?.StorageMode == StorageMode.SqlServer)
+            if (settings.CurrentValue.MtBrokersLogs.StorageMode == StorageMode.SqlServer)
+            {
+                var sqlLogger = new LogToSql(new SqlLogRepository(logTableName,
+                    settings.CurrentValue.MtBrokersLogs.DbConnString));
+
+                aggregateLogger.AddLog(sqlLogger);
+            } 
+            else if (settings.CurrentValue.MtBrokersLogs.StorageMode == StorageMode.Azure)
+            {
+                var dbLogConnectionStringManager = settings.Nested(x => x.MtBrokersLogs.DbConnString);
+                var dbLogConnectionString = dbLogConnectionStringManager.CurrentValue;
+    
+                if (string.IsNullOrEmpty(dbLogConnectionString))
                 {
-                    var sqlLogger = new LogToSql(new SqlLogRepository(logTableName, dbLogConnectionString));
-                
-                    aggregateLogger.AddLog(sqlLogger);
+                    consoleLogger.WriteWarningAsync(ApplicationName, 
+                        nameof(CreateLogWithSlack), "Table logger is not initialized").Wait();
+                    return aggregateLogger;
                 }
+    
+                if (dbLogConnectionString.StartsWith("${") && dbLogConnectionString.EndsWith("}"))
+                    throw new InvalidOperationException($"LogsConnString {dbLogConnectionString} is not filled in settings");
+    
+                // Creating azure storage logger, which logs own messages to console log
+                var azureStorageLogger = services.UseLogToAzureStorage(settings.Nested(s => s.MtBrokersLogs.DbConnString),
+                    slackService, logTableName, consoleLogger);
+                
+                azureStorageLogger.Start();
+                
+                aggregateLogger.AddLog(azureStorageLogger);
             }
 
             return aggregateLogger;
