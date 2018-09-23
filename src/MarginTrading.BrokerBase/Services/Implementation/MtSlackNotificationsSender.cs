@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Text;
 using System.Threading.Tasks;
+using Lykke.MarginTrading.BrokerBase.Models;
 using Lykke.SlackNotifications;
-using MarginTrading.BrokerBase.Models;
 
-namespace MarginTrading.BrokerBase.Services.Implementation
+namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
 {
     public class MtSlackNotificationsSender : IMtSlackNotificationsSender
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using AutoMapper;
 
-namespace MarginTrading.BrokerBase.Services
+namespace Lykke.MarginTrading.BrokerBase.Services
 {
     public interface IConvertService
     {
