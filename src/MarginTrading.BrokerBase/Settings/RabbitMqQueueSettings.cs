@@ -1,4 +1,4 @@
-﻿namespace MarginTrading.BrokerBase.Settings
+﻿namespace Lykke.MarginTrading.BrokerBase.Settings
 {
     public class RabbitMqQueueSettings
     {

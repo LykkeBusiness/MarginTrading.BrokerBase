@@ -1,6 +1,6 @@
-﻿using MarginTrading.BrokerBase.Models;
+﻿using Lykke.MarginTrading.BrokerBase.Models;
 
-namespace MarginTrading.BrokerBase.Settings
+namespace Lykke.MarginTrading.BrokerBase.Settings
 {
     public class BrokersLogsSettings
     {

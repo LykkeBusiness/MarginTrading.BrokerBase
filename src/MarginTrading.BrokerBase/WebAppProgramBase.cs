@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading;
 using Microsoft.AspNetCore.Hosting;
 
-namespace MarginTrading.BrokerBase
+namespace Lykke.MarginTrading.BrokerBase
 {
     public class WebAppProgramBase<TStartup> where TStartup : class
     {

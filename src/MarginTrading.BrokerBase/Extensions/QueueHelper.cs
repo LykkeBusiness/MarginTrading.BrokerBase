@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.PlatformAbstractions;
 
-namespace MarginTrading.BrokerBase
+namespace Lykke.MarginTrading.BrokerBase.Extensions
 {
     public static class QueueHelper
     {

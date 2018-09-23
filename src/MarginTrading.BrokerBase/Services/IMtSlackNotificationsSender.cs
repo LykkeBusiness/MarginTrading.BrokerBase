@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Lykke.SlackNotifications;
 
-namespace MarginTrading.BrokerBase.Services
+namespace Lykke.MarginTrading.BrokerBase.Services
 {
     public interface IMtSlackNotificationsSender : ISlackNotificationsSender
     {

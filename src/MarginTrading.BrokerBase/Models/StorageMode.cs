@@ -1,4 +1,4 @@
-﻿namespace MarginTrading.BrokerBase.Models
+﻿namespace Lykke.MarginTrading.BrokerBase.Models
 {
     public enum StorageMode
     {

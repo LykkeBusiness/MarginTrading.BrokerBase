@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Common.Log;
+using Lykke.MarginTrading.BrokerBase.Extensions;
+using Lykke.MarginTrading.BrokerBase.Models;
+using Lykke.MarginTrading.BrokerBase.Settings;
 using Lykke.RabbitMqBroker;
 using Lykke.RabbitMqBroker.Subscriber;
 using Lykke.SlackNotifications;
-using MarginTrading.BrokerBase.Models;
-using MarginTrading.BrokerBase.Settings;
 
-namespace MarginTrading.BrokerBase
+namespace Lykke.MarginTrading.BrokerBase
 {
     public abstract class BrokerApplicationBase<TMessage> : IBrokerApplication
     {

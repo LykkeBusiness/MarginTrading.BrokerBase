@@ -1,7 +1,7 @@
-﻿using MarginTrading.BrokerBase.Settings;
+﻿using Lykke.MarginTrading.BrokerBase.Settings;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MarginTrading.BrokerBase.Controllers
+namespace Lykke.MarginTrading.BrokerBase.Controllers
 {
     [Route("api/[controller]")]
     public class IsAliveController : Controller

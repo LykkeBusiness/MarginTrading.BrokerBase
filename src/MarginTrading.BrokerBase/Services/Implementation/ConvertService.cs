@@ -3,9 +3,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using AutoMapper;
 using JetBrains.Annotations;
+using Lykke.MarginTrading.BrokerBase.Extensions;
 using Microsoft.AspNetCore.Routing;
 
-namespace MarginTrading.BrokerBase.Services.Implementation
+namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
 {
     [UsedImplicitly]
     public class ConvertService : IConvertService

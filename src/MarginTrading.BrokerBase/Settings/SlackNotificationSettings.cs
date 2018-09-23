@@ -1,6 +1,6 @@
 ﻿using Lykke.AzureQueueIntegration;
 
-namespace MarginTrading.BrokerBase.Settings
+namespace Lykke.MarginTrading.BrokerBase.Settings
 {
     public class SlackNotificationSettings
     {
