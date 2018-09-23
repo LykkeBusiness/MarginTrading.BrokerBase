@@ -1,7 +1,7 @@
 ﻿using JetBrains.Annotations;
 using Lykke.SettingsReader.Attributes;
 
-namespace MarginTrading.BrokerBase.Settings
+namespace Lykke.MarginTrading.BrokerBase.Settings
 {
     public interface IBrokerApplicationSettings<TBrokerSettings> 
         where TBrokerSettings : BrokerSettingsBase

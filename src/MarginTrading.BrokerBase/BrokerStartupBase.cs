@@ -2,18 +2,18 @@
 using System.IO;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using AzureStorage.Tables;
 using Common.Log;
 using Lykke.AzureQueueIntegration;
 using Lykke.Logs;
+using Lykke.Logs.MsSql;
+using Lykke.Logs.MsSql.Repositories;
+using Lykke.MarginTrading.BrokerBase.Models;
+using Lykke.MarginTrading.BrokerBase.Services;
+using Lykke.MarginTrading.BrokerBase.Services.Implementation;
+using Lykke.MarginTrading.BrokerBase.Settings;
 using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
 using Lykke.SlackNotifications;
-using MarginTrading.BrokerBase.Models;
-using MarginTrading.BrokerBase.Repositories.Implementation;
-using MarginTrading.BrokerBase.Services;
-using MarginTrading.BrokerBase.Services.Implementation;
-using MarginTrading.BrokerBase.Settings;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -22,7 +22,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.PlatformAbstractions;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
-namespace MarginTrading.BrokerBase
+namespace Lykke.MarginTrading.BrokerBase
 {
     public abstract class BrokerStartupBase<TApplicationSettings, TSettings>
         where TApplicationSettings : class, IBrokerApplicationSettings<TSettings>

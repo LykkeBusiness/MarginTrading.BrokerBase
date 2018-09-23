@@ -2,7 +2,7 @@
 using System.Data.SqlClient;
 using Dapper;
 
-namespace MarginTrading.BrokerBase
+namespace Lykke.MarginTrading.BrokerBase.Extensions
 {
     public static class SqlExtensions
     {

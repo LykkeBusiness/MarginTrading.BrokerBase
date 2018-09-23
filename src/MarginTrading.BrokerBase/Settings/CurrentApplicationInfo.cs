@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MarginTrading.BrokerBase.Settings
+namespace Lykke.MarginTrading.BrokerBase.Settings
 {
     public class CurrentApplicationInfo
     {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 
-namespace MarginTrading.BrokerBase
+namespace Lykke.MarginTrading.BrokerBase.Extensions
 {
     public static class ValidationExtensions
     {

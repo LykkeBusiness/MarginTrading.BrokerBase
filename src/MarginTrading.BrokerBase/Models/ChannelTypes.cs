@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace MarginTrading.BrokerBase.Models
+namespace Lykke.MarginTrading.BrokerBase.Models
 {
     [JsonConverter(typeof(StringEnumConverter))]
     public static class ChannelTypes

@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 
-namespace MarginTrading.BrokerBase
+namespace Lykke.MarginTrading.BrokerBase
 {
     [UsedImplicitly]
     public static class ConfigurationBuilderExtensions

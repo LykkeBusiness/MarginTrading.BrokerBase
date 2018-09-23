@@ -2,9 +2,9 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using Common.Log;
-using MarginTrading.BrokerBase.Models;
+using Lykke.MarginTrading.BrokerBase.Models;
 
-namespace MarginTrading.BrokerBase.Services.Implementation
+namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
 {
     public class MtSlackNotificationsSenderLogStub : IMtSlackNotificationsSender
     {

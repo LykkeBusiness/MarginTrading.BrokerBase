@@ -1,6 +1,6 @@
 ﻿using Lykke.SettingsReader.Attributes;
 
-namespace MarginTrading.BrokerBase.Settings
+namespace Lykke.MarginTrading.BrokerBase.Settings
 {
     public class BrokerSettingsBase
     {

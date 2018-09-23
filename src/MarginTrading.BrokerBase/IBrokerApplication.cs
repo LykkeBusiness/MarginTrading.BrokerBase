@@ -1,4 +1,4 @@
-﻿namespace MarginTrading.BrokerBase
+﻿namespace Lykke.MarginTrading.BrokerBase
 {
     public interface IBrokerApplication
     {
