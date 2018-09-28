@@ -6,6 +6,8 @@ namespace Lykke.MarginTrading.BrokerBase.Settings
     {
         public StorageMode StorageMode { get; set; }
         
-        public string DbConnString { get; set; }
+        public string DataConnString { get; set; }
+        
+        public string LogsConnString { get; set; }
     }
 }
