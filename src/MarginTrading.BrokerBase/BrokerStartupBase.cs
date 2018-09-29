@@ -187,7 +187,6 @@ namespace Lykke.MarginTrading.BrokerBase
             return aggregateLogger;
         }
 
-
         private void RegisterServices(IServiceCollection services, IReloadingManager<TApplicationSettings> applicationSettings,
             ContainerBuilder builder)
         {
@@ -196,7 +195,6 @@ namespace Lykke.MarginTrading.BrokerBase
             builder.RegisterInstance(applicationInfo).AsSelf().SingleInstance();
             Log = CreateLogWithSlack(services, applicationSettings, applicationInfo);
             builder.RegisterInstance(Log).As<ILog>().SingleInstance();
-            builder.RegisterType<ConvertService>().As<IConvertService>().SingleInstance();
             builder.RegisterInstance(applicationSettings).AsSelf().SingleInstance();
 
             var settings = applicationSettings.Nested(s => s.MtBrokerSettings);
