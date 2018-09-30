@@ -57,14 +57,13 @@ namespace Lykke.MarginTrading.BrokerBase
             try
             {
                 var settings = GetRabbitMqSubscriptionSettings();
-                _connector =
-                    new RabbitMqSubscriber<TMessage>(settings,
-                            new ResilientErrorHandlingStrategy(_logger, settings, TimeSpan.FromSeconds(1)))
-                        .SetMessageDeserializer(new JsonMessageDeserializer<TMessage>())
-                        .SetMessageReadStrategy(new MessageReadWithTemporaryQueueStrategy())
-                        .Subscribe(HandleMessage)
-                        .SetLogger(_logger)
-                        .Start();
+                _connector = new RabbitMqSubscriber<TMessage>(settings,
+                        new ResilientErrorHandlingStrategy(_logger, settings, TimeSpan.FromSeconds(1)))
+                    .SetMessageDeserializer(new JsonMessageDeserializer<TMessage>())
+                    .SetMessageReadStrategy(new MessageReadWithTemporaryQueueStrategy(RoutingKey ?? ""))
+                    .Subscribe(HandleMessage)
+                    .SetLogger(_logger)
+                    .Start();
 
                 WriteInfoToLogAndSlack("Broker listening queue " + settings.QueueName);
             }
