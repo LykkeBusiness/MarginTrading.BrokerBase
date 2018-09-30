@@ -18,6 +18,7 @@ namespace Lykke.MarginTrading.BrokerBase
         private readonly ISlackNotificationsSender _slackNotificationsSender;
         protected readonly CurrentApplicationInfo ApplicationInfo;
         private RabbitMqSubscriber<TMessage> _connector;
+        private readonly MessageFormat _messageFormat;
 
         protected abstract BrokerSettingsBase Settings { get; }
         protected abstract string ExchangeName { get; }
@@ -43,11 +44,12 @@ namespace Lykke.MarginTrading.BrokerBase
         protected abstract Task HandleMessage(TMessage message);
 
         protected BrokerApplicationBase(ILog logger, ISlackNotificationsSender slackNotificationsSender,
-            CurrentApplicationInfo applicationInfo)
+            CurrentApplicationInfo applicationInfo, MessageFormat messageFormat = MessageFormat.Json)
         {
             _logger = logger;
             _slackNotificationsSender = slackNotificationsSender;
             ApplicationInfo = applicationInfo;
+            _messageFormat = messageFormat;
         }
 
         public virtual void Run()
@@ -59,7 +61,9 @@ namespace Lykke.MarginTrading.BrokerBase
                 var settings = GetRabbitMqSubscriptionSettings();
                 _connector = new RabbitMqSubscriber<TMessage>(settings,
                         new ResilientErrorHandlingStrategy(_logger, settings, TimeSpan.FromSeconds(1)))
-                    .SetMessageDeserializer(new JsonMessageDeserializer<TMessage>())
+                    .SetMessageDeserializer(_messageFormat == MessageFormat.Json
+                        ? new JsonMessageDeserializer<TMessage>()
+                        : (IMessageDeserializer<TMessage>)new MessagePackMessageDeserializer<TMessage>())
                     .SetMessageReadStrategy(new MessageReadWithTemporaryQueueStrategy(RoutingKey ?? ""))
                     .Subscribe(HandleMessage)
                     .SetLogger(_logger)
