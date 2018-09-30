@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Common.Log;
+using JetBrains.Annotations;
 using Lykke.MarginTrading.BrokerBase.Extensions;
 using Lykke.MarginTrading.BrokerBase.Models;
 using Lykke.MarginTrading.BrokerBase.Settings;
@@ -10,6 +11,7 @@ using Lykke.SlackNotifications;
 
 namespace Lykke.MarginTrading.BrokerBase
 {
+    [UsedImplicitly]
     public abstract class BrokerApplicationBase<TMessage> : IBrokerApplication
     {
         protected readonly ILog _logger;
@@ -19,17 +21,23 @@ namespace Lykke.MarginTrading.BrokerBase
 
         protected abstract BrokerSettingsBase Settings { get; }
         protected abstract string ExchangeName { get; }
+        protected abstract string RoutingKey { get; }
         protected virtual string QueuePostfix => string.Empty;
         
         private RabbitMqSubscriptionSettings GetRabbitMqSubscriptionSettings()
         {
-            return new RabbitMqSubscriptionSettings
+            var settings = new RabbitMqSubscriptionSettings
             {
                 ConnectionString = Settings.MtRabbitMqConnString,
                 QueueName = QueueHelper.BuildQueueName(ExchangeName, Settings.Env, QueuePostfix),
                 ExchangeName = ExchangeName,
                 IsDurable = true
             };
+            if (!string.IsNullOrWhiteSpace(RoutingKey))
+            {
+                settings.RoutingKey = RoutingKey;
+            }
+            return settings;
         }
 
         protected abstract Task HandleMessage(TMessage message);
