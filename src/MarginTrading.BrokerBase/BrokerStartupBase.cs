@@ -156,13 +156,13 @@ namespace Lykke.MarginTrading.BrokerBase
             if (settings.CurrentValue.MtBrokersLogs.StorageMode == StorageMode.SqlServer)
             {
                 var sqlLogger = new LogToSql(new SqlLogRepository(logTableName,
-                    settings.CurrentValue.MtBrokersLogs.DbConnString));
+                    settings.CurrentValue.MtBrokersLogs.LogsConnString));
 
                 aggregateLogger.AddLog(sqlLogger);
             } 
             else if (settings.CurrentValue.MtBrokersLogs.StorageMode == StorageMode.Azure)
             {
-                var dbLogConnectionStringManager = settings.Nested(x => x.MtBrokersLogs.DbConnString);
+                var dbLogConnectionStringManager = settings.Nested(x => x.MtBrokersLogs.LogsConnString);
                 var dbLogConnectionString = dbLogConnectionStringManager.CurrentValue;
     
                 if (string.IsNullOrEmpty(dbLogConnectionString))
@@ -176,7 +176,7 @@ namespace Lykke.MarginTrading.BrokerBase
                     throw new InvalidOperationException($"LogsConnString {dbLogConnectionString} is not filled in settings");
     
                 // Creating azure storage logger, which logs own messages to console log
-                var azureStorageLogger = services.UseLogToAzureStorage(settings.Nested(s => s.MtBrokersLogs.DbConnString),
+                var azureStorageLogger = services.UseLogToAzureStorage(settings.Nested(s => s.MtBrokersLogs.LogsConnString),
                     slackService, logTableName, consoleLogger);
                 
                 azureStorageLogger.Start();
@@ -187,7 +187,6 @@ namespace Lykke.MarginTrading.BrokerBase
             return aggregateLogger;
         }
 
-
         private void RegisterServices(IServiceCollection services, IReloadingManager<TApplicationSettings> applicationSettings,
             ContainerBuilder builder)
         {
@@ -196,7 +195,6 @@ namespace Lykke.MarginTrading.BrokerBase
             builder.RegisterInstance(applicationInfo).AsSelf().SingleInstance();
             Log = CreateLogWithSlack(services, applicationSettings, applicationInfo);
             builder.RegisterInstance(Log).As<ILog>().SingleInstance();
-            builder.RegisterType<ConvertService>().As<IConvertService>().SingleInstance();
             builder.RegisterInstance(applicationSettings).AsSelf().SingleInstance();
 
             var settings = applicationSettings.Nested(s => s.MtBrokerSettings);

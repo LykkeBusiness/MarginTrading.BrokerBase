@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Common.Log;
+using JetBrains.Annotations;
 using Lykke.MarginTrading.BrokerBase.Extensions;
 using Lykke.MarginTrading.BrokerBase.Models;
 using Lykke.MarginTrading.BrokerBase.Settings;
@@ -10,36 +11,45 @@ using Lykke.SlackNotifications;
 
 namespace Lykke.MarginTrading.BrokerBase
 {
+    [UsedImplicitly]
     public abstract class BrokerApplicationBase<TMessage> : IBrokerApplication
     {
         protected readonly ILog _logger;
         private readonly ISlackNotificationsSender _slackNotificationsSender;
         protected readonly CurrentApplicationInfo ApplicationInfo;
         private RabbitMqSubscriber<TMessage> _connector;
+        private readonly MessageFormat _messageFormat;
 
         protected abstract BrokerSettingsBase Settings { get; }
         protected abstract string ExchangeName { get; }
+        protected abstract string RoutingKey { get; }
         protected virtual string QueuePostfix => string.Empty;
         
         private RabbitMqSubscriptionSettings GetRabbitMqSubscriptionSettings()
         {
-            return new RabbitMqSubscriptionSettings
+            var settings = new RabbitMqSubscriptionSettings
             {
                 ConnectionString = Settings.MtRabbitMqConnString,
                 QueueName = QueueHelper.BuildQueueName(ExchangeName, Settings.Env, QueuePostfix),
                 ExchangeName = ExchangeName,
                 IsDurable = true
             };
+            if (!string.IsNullOrWhiteSpace(RoutingKey))
+            {
+                settings.RoutingKey = RoutingKey;
+            }
+            return settings;
         }
 
         protected abstract Task HandleMessage(TMessage message);
 
         protected BrokerApplicationBase(ILog logger, ISlackNotificationsSender slackNotificationsSender,
-            CurrentApplicationInfo applicationInfo)
+            CurrentApplicationInfo applicationInfo, MessageFormat messageFormat = MessageFormat.Json)
         {
             _logger = logger;
             _slackNotificationsSender = slackNotificationsSender;
             ApplicationInfo = applicationInfo;
+            _messageFormat = messageFormat;
         }
 
         public virtual void Run()
@@ -49,14 +59,15 @@ namespace Lykke.MarginTrading.BrokerBase
             try
             {
                 var settings = GetRabbitMqSubscriptionSettings();
-                _connector =
-                    new RabbitMqSubscriber<TMessage>(settings,
-                            new ResilientErrorHandlingStrategy(_logger, settings, TimeSpan.FromSeconds(1)))
-                        .SetMessageDeserializer(new JsonMessageDeserializer<TMessage>())
-                        .SetMessageReadStrategy(new MessageReadWithTemporaryQueueStrategy())
-                        .Subscribe(HandleMessage)
-                        .SetLogger(_logger)
-                        .Start();
+                _connector = new RabbitMqSubscriber<TMessage>(settings,
+                        new ResilientErrorHandlingStrategy(_logger, settings, TimeSpan.FromSeconds(1)))
+                    .SetMessageDeserializer(_messageFormat == MessageFormat.Json
+                        ? new JsonMessageDeserializer<TMessage>()
+                        : (IMessageDeserializer<TMessage>)new MessagePackMessageDeserializer<TMessage>())
+                    .SetMessageReadStrategy(new MessageReadWithTemporaryQueueStrategy(RoutingKey ?? ""))
+                    .Subscribe(HandleMessage)
+                    .SetLogger(_logger)
+                    .Start();
 
                 WriteInfoToLogAndSlack("Broker listening queue " + settings.QueueName);
             }
