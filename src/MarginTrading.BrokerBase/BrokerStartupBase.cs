@@ -155,9 +155,9 @@ namespace Lykke.MarginTrading.BrokerBase
             services.AddSingleton<ISlackNotificationsSender>(slackService);
             services.AddSingleton<IMtSlackNotificationsSender>(slackService);
 
-            if (settings.CurrentValue.MtBrokersLogs.WriteToFile)
+            if (settings.CurrentValue.MtBrokersLogs.UseSerilog)
             {
-                aggregateLogger.AddLog(new LogToFile(applicationInfo.GetType().Assembly, Configuration));
+                aggregateLogger.AddLog(new SerilogLogger(applicationInfo.GetType().Assembly, Configuration));
             }
             else if (settings.CurrentValue.MtBrokersLogs.StorageMode == StorageMode.SqlServer)
             {
