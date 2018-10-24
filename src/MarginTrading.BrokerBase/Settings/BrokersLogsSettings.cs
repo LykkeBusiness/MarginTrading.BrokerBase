@@ -8,7 +8,7 @@ namespace Lykke.MarginTrading.BrokerBase.Settings
         public StorageMode StorageMode { get; set; }
         
         [Optional]
-        public bool WriteToFile { get; set; }
+        public bool UseSerilog { get; set; }
         
         public string LogsConnString { get; set; }
     }
