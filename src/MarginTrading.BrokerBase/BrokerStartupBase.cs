@@ -7,6 +7,7 @@ using Lykke.AzureQueueIntegration;
 using Lykke.Logs;
 using Lykke.Logs.MsSql;
 using Lykke.Logs.MsSql.Repositories;
+using Lykke.Logs.Serilog;
 using Lykke.MarginTrading.BrokerBase.Models;
 using Lykke.MarginTrading.BrokerBase.Services;
 using Lykke.MarginTrading.BrokerBase.Services.Implementation;
@@ -40,6 +41,7 @@ namespace Lykke.MarginTrading.BrokerBase
             Configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddDevJson(env)
+                .AddSerilogJson(env)
                 .AddEnvironmentVariables()
                 .Build();
 
@@ -153,12 +155,14 @@ namespace Lykke.MarginTrading.BrokerBase
             services.AddSingleton<ISlackNotificationsSender>(slackService);
             services.AddSingleton<IMtSlackNotificationsSender>(slackService);
 
-            if (settings.CurrentValue.MtBrokersLogs.StorageMode == StorageMode.SqlServer)
+            if (settings.CurrentValue.MtBrokersLogs.UseSerilog)
             {
-                var sqlLogger = new LogToSql(new SqlLogRepository(logTableName,
-                    settings.CurrentValue.MtBrokersLogs.LogsConnString));
-
-                aggregateLogger.AddLog(sqlLogger);
+                aggregateLogger.AddLog(new SerilogLogger(applicationInfo.GetType().Assembly, Configuration));
+            }
+            else if (settings.CurrentValue.MtBrokersLogs.StorageMode == StorageMode.SqlServer)
+            {
+                aggregateLogger.AddLog(new LogToSql(new SqlLogRepository(logTableName,
+                    settings.CurrentValue.MtBrokersLogs.LogsConnString)));
             } 
             else if (settings.CurrentValue.MtBrokersLogs.StorageMode == StorageMode.Azure)
             {
