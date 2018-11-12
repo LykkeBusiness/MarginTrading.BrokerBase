@@ -25,6 +25,8 @@ namespace Lykke.MarginTrading.BrokerBase
         protected abstract string RoutingKey { get; }
         protected virtual string QueuePostfix => string.Empty;
         
+        protected DateTime LastMessageTime { get; private set; }
+        
         private RabbitMqSubscriptionSettings GetRabbitMqSubscriptionSettings()
         {
             var settings = new RabbitMqSubscriptionSettings
@@ -52,6 +54,20 @@ namespace Lykke.MarginTrading.BrokerBase
             _messageFormat = messageFormat;
         }
 
+        private Task HandleMessageWithThrottling(TMessage message)
+        {
+            var messageTime = DateTime.UtcNow;
+
+            if (!Settings.ThrottlingRateThreshold.HasValue
+                || messageTime.Subtract(LastMessageTime).TotalSeconds > (1 / Settings.ThrottlingRateThreshold))
+            {
+                LastMessageTime = messageTime;
+                return HandleMessage(message);
+            }
+            
+            return Task.CompletedTask;
+        }
+
         public virtual void Run()
         {
             WriteInfoToLogAndSlack("Starting listening exchange " + ExchangeName);
@@ -65,7 +81,7 @@ namespace Lykke.MarginTrading.BrokerBase
                         ? new JsonMessageDeserializer<TMessage>()
                         : (IMessageDeserializer<TMessage>)new MessagePackMessageDeserializer<TMessage>())
                     .SetMessageReadStrategy(new MessageReadWithTemporaryQueueStrategy(RoutingKey ?? ""))
-                    .Subscribe(HandleMessage)
+                    .Subscribe(HandleMessageWithThrottling)
                     .SetLogger(_logger)
                     .Start();
 
