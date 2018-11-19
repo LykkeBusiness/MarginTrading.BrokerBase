@@ -14,7 +14,7 @@ namespace Lykke.MarginTrading.BrokerBase
     [UsedImplicitly]
     public abstract class BrokerApplicationBase<TMessage> : IBrokerApplication
     {
-        protected readonly ILog _logger;
+        protected readonly ILog Logger;
         private readonly ISlackNotificationsSender _slackNotificationsSender;
         protected readonly CurrentApplicationInfo ApplicationInfo;
         private RabbitMqSubscriber<TMessage> _connector;
@@ -48,7 +48,7 @@ namespace Lykke.MarginTrading.BrokerBase
         protected BrokerApplicationBase(ILog logger, ISlackNotificationsSender slackNotificationsSender,
             CurrentApplicationInfo applicationInfo, MessageFormat messageFormat = MessageFormat.Json)
         {
-            _logger = logger;
+            Logger = logger;
             _slackNotificationsSender = slackNotificationsSender;
             ApplicationInfo = applicationInfo;
             _messageFormat = messageFormat;
@@ -58,8 +58,7 @@ namespace Lykke.MarginTrading.BrokerBase
         {
             var messageTime = DateTime.UtcNow;
 
-            if (!Settings.ThrottlingRateThreshold.HasValue
-                || messageTime.Subtract(LastMessageTime).TotalSeconds > (1 / Settings.ThrottlingRateThreshold))
+            if (messageTime.Subtract(LastMessageTime).TotalSeconds > (1 / Settings.ThrottlingRateThreshold))
             {
                 LastMessageTime = messageTime;
                 return HandleMessage(message);
@@ -76,20 +75,22 @@ namespace Lykke.MarginTrading.BrokerBase
             {
                 var settings = GetRabbitMqSubscriptionSettings();
                 _connector = new RabbitMqSubscriber<TMessage>(settings,
-                        new ResilientErrorHandlingStrategy(_logger, settings, TimeSpan.FromSeconds(1)))
+                        new ResilientErrorHandlingStrategy(Logger, settings, TimeSpan.FromSeconds(1)))
                     .SetMessageDeserializer(_messageFormat == MessageFormat.Json
                         ? new JsonMessageDeserializer<TMessage>()
                         : (IMessageDeserializer<TMessage>)new MessagePackMessageDeserializer<TMessage>())
                     .SetMessageReadStrategy(new MessageReadWithTemporaryQueueStrategy(RoutingKey ?? ""))
-                    .Subscribe(HandleMessageWithThrottling)
-                    .SetLogger(_logger)
+                    .Subscribe(msg => Settings.ThrottlingRateThreshold.HasValue 
+                        ? HandleMessageWithThrottling(msg)
+                        : HandleMessage(msg))
+                    .SetLogger(Logger)
                     .Start();
 
                 WriteInfoToLogAndSlack("Broker listening queue " + settings.QueueName);
             }
             catch (Exception ex)
             {
-                _logger.WriteErrorAsync(ApplicationInfo.ApplicationFullName, "Application.RunAsync", null, ex).GetAwaiter()
+                Logger.WriteErrorAsync(ApplicationInfo.ApplicationFullName, "Application.RunAsync", null, ex).GetAwaiter()
                     .GetResult();
             }
         }
@@ -103,7 +104,7 @@ namespace Lykke.MarginTrading.BrokerBase
 
         protected void WriteInfoToLogAndSlack(string infoMessage)
         {
-            _logger.WriteInfoAsync(ApplicationInfo.ApplicationFullName, null, null, infoMessage);
+            Logger.WriteInfoAsync(ApplicationInfo.ApplicationFullName, null, null, infoMessage);
             _slackNotificationsSender.SendAsync(ChannelTypes.MarginTrading, ApplicationInfo.ApplicationFullName,
                 infoMessage);
         }

@@ -130,6 +130,18 @@ namespace Lykke.MarginTrading.BrokerBase
             
             aggregateLogger.AddLog(consoleLogger);
 
+            #region Logs settings validation
+
+            if (!settings.CurrentValue.MtBrokersLogs.UseSerilog 
+                && string.IsNullOrWhiteSpace(settings.CurrentValue.MtBrokersLogs.LogsConnString))
+            {
+                throw new Exception("Either UseSerilog must be true or LogsConnString must be set");
+            }
+
+            #endregion Logs settings validation
+            
+            #region Slack registration
+
             IMtSlackNotificationsSender slackService = null;
 
             if (settings.CurrentValue.SlackNotifications != null)
@@ -155,6 +167,8 @@ namespace Lykke.MarginTrading.BrokerBase
             services.AddSingleton<ISlackNotificationsSender>(slackService);
             services.AddSingleton<IMtSlackNotificationsSender>(slackService);
 
+            #endregion Slack registration
+            
             if (settings.CurrentValue.MtBrokersLogs.UseSerilog)
             {
                 aggregateLogger.AddLog(new SerilogLogger(applicationInfo.GetType().Assembly, Configuration));

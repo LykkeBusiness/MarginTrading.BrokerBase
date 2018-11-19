@@ -1,15 +1,19 @@
-﻿using Lykke.MarginTrading.BrokerBase.Models;
+﻿using JetBrains.Annotations;
+using Lykke.MarginTrading.BrokerBase.Models;
 using Lykke.SettingsReader.Attributes;
 
 namespace Lykke.MarginTrading.BrokerBase.Settings
 {
+    [UsedImplicitly]
     public class BrokersLogsSettings
     {
-        public StorageMode StorageMode { get; set; }
+        [Optional] 
+        public StorageMode StorageMode { get; set; } = StorageMode.SqlServer;
+        
+        [Optional]
+        public string LogsConnString { get; set; }
         
         [Optional]
         public bool UseSerilog { get; set; }
-        
-        public string LogsConnString { get; set; }
     }
 }
