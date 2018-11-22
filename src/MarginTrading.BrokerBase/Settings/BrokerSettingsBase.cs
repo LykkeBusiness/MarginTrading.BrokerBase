@@ -1,7 +1,9 @@
-﻿using Lykke.SettingsReader.Attributes;
+﻿using JetBrains.Annotations;
+using Lykke.SettingsReader.Attributes;
 
 namespace Lykke.MarginTrading.BrokerBase.Settings
 {
+    [UsedImplicitly]
     public class BrokerSettingsBase
     {
         public string MtRabbitMqConnString { get; set; }

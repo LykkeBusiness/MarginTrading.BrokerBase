@@ -3,13 +3,13 @@ using Lykke.SettingsReader.Attributes;
 
 namespace Lykke.MarginTrading.BrokerBase.Settings
 {
+    [UsedImplicitly]
     public class DefaultBrokerApplicationSettings<TBrokerSettings>: IBrokerApplicationSettings<TBrokerSettings>
         where TBrokerSettings: BrokerSettingsBase
     {
-        [Optional, CanBeNull]
+        [Optional]
         public SlackNotificationSettings SlackNotifications { get; set; }
         
-        [Optional, CanBeNull]
         public BrokersLogsSettings MtBrokersLogs { get; set; }
         
         public TBrokerSettings MtBrokerSettings { get; set; }
