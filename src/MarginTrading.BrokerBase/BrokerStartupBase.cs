@@ -61,7 +61,7 @@ namespace Lykke.MarginTrading.BrokerBase
             services.AddMvc();
 
             var applicationSettings = Configuration.LoadSettings<TApplicationSettings>(
-                    throwExceptionOnCheckError: !Configuration.NotTrowExceptionsOnServiceValidation())
+                    throwExceptionOnCheckError: !Configuration.NotThrowExceptionsOnServiceValidation())
                 .Nested(s =>
                 {
                     var settings = s.MtBrokerSettings;
