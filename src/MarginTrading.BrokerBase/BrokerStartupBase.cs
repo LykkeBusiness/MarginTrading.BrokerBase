@@ -8,6 +8,7 @@ using Lykke.Logs;
 using Lykke.Logs.MsSql;
 using Lykke.Logs.MsSql.Repositories;
 using Lykke.Logs.Serilog;
+using Lykke.MarginTrading.BrokerBase.Extensions;
 using Lykke.MarginTrading.BrokerBase.Models;
 using Lykke.MarginTrading.BrokerBase.Services;
 using Lykke.MarginTrading.BrokerBase.Services.Implementation;
@@ -59,7 +60,8 @@ namespace Lykke.MarginTrading.BrokerBase
             services.AddSingleton(Configuration);
             services.AddMvc();
 
-            var applicationSettings = Configuration.LoadSettings<TApplicationSettings>()
+            var applicationSettings = Configuration.LoadSettings<TApplicationSettings>(
+                    throwExceptionOnCheckError: !Configuration.NotThrowExceptionsOnServiceValidation())
                 .Nested(s =>
                 {
                     var settings = s.MtBrokerSettings;
