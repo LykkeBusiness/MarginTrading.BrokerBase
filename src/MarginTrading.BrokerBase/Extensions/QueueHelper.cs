@@ -9,5 +9,10 @@ namespace Lykke.MarginTrading.BrokerBase.Extensions
             return
                 $"{exchangeName}.{PlatformServices.Default.Application.ApplicationName}.{env ?? "DefaultEnv"}{postfix}";
         }
+        
+        public static string BuildDeadLetterExchangeName(string exchangeName)
+        {
+            return $"{exchangeName}.dlx";
+        }
     }
 }
