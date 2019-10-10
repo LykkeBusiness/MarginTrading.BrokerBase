@@ -1,2 +1,2 @@
 # MarginTrading.BrokerBase
-Base broke solution
+Base broke solution to simplify and standardise brokers creation
