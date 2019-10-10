@@ -16,5 +16,8 @@ namespace Lykke.MarginTrading.BrokerBase.Settings
         /// </summary>
         [Optional]
         public int? ThrottlingRateThreshold { get; set; }
+
+        [Optional] 
+        public int ConsumerCount { get; set; } = 1;
     }
 }
