@@ -34,7 +34,8 @@ namespace Lykke.MarginTrading.BrokerBase
                 ConnectionString = Settings.MtRabbitMqConnString,
                 QueueName = QueueHelper.BuildQueueName(ExchangeName, Settings.Env, QueuePostfix),
                 ExchangeName = ExchangeName,
-                IsDurable = true
+                IsDurable = true,
+                DeadLetterExchangeName = QueueHelper.BuildDeadLetterExchangeName(ExchangeName),
             };
             if (!string.IsNullOrWhiteSpace(RoutingKey))
             {
@@ -67,6 +68,19 @@ namespace Lykke.MarginTrading.BrokerBase
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// By default the pipeline is ResilientErrorHandlingStrategy (1 sec, 5 times) followed by DeadQueueErrorHandlingStrategy.
+        /// Override if own strategy required.
+        /// </summary>
+        protected virtual IErrorHandlingStrategy GetErrorHandlingStrategy(RabbitMqSubscriptionSettings settings)
+        {
+            return GetDefaultErrorHandlingStrategy(settings);
+        }
+
+        protected IErrorHandlingStrategy GetDefaultErrorHandlingStrategy(RabbitMqSubscriptionSettings settings) =>
+            new ResilientErrorHandlingStrategy(Logger, settings, TimeSpan.FromSeconds(1),
+                next: new DeadQueueErrorHandlingStrategy(Logger, settings));
+
         public virtual void Run()
         {
             WriteInfoToLogAndSlack("Starting listening exchange " + ExchangeName);
@@ -74,8 +88,8 @@ namespace Lykke.MarginTrading.BrokerBase
             try
             {
                 var settings = GetRabbitMqSubscriptionSettings();
-                _connector = new RabbitMqSubscriber<TMessage>(settings,
-                        new ResilientErrorHandlingStrategy(Logger, settings, TimeSpan.FromSeconds(1)))
+                
+                _connector = new RabbitMqSubscriber<TMessage>(settings, GetErrorHandlingStrategy(settings))
                     .SetMessageDeserializer(_messageFormat == MessageFormat.Json
                         ? new JsonMessageDeserializer<TMessage>()
                         : (IMessageDeserializer<TMessage>)new MessagePackMessageDeserializer<TMessage>())
@@ -104,7 +118,7 @@ namespace Lykke.MarginTrading.BrokerBase
 
         protected void WriteInfoToLogAndSlack(string infoMessage)
         {
-            Logger.WriteInfoAsync(ApplicationInfo.ApplicationFullName, null, null, infoMessage);
+            Logger.WriteInfo(ApplicationInfo.ApplicationFullName, null, infoMessage);
             _slackNotificationsSender.SendAsync(ChannelTypes.MarginTrading, ApplicationInfo.ApplicationFullName,
                 infoMessage);
         }
