@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Common;
 using Common.Log;
 using JetBrains.Annotations;
 using Lykke.MarginTrading.BrokerBase.Extensions;
@@ -17,7 +21,7 @@ namespace Lykke.MarginTrading.BrokerBase
         protected readonly ILog Logger;
         private readonly ISlackNotificationsSender _slackNotificationsSender;
         protected readonly CurrentApplicationInfo ApplicationInfo;
-        private RabbitMqSubscriber<TMessage> _connector;
+        private readonly ConcurrentDictionary<int, IStopable> _subscribers = new ConcurrentDictionary<int, IStopable>();
         private readonly MessageFormat _messageFormat;
 
         protected abstract BrokerSettingsBase Settings { get; }
@@ -87,20 +91,32 @@ namespace Lykke.MarginTrading.BrokerBase
             
             try
             {
-                var settings = GetRabbitMqSubscriptionSettings();
-                
-                _connector = new RabbitMqSubscriber<TMessage>(settings, GetErrorHandlingStrategy(settings))
-                    .SetMessageDeserializer(_messageFormat == MessageFormat.Json
-                        ? new JsonMessageDeserializer<TMessage>()
-                        : (IMessageDeserializer<TMessage>)new MessagePackMessageDeserializer<TMessage>())
-                    .SetMessageReadStrategy(new MessageReadWithTemporaryQueueStrategy(RoutingKey ?? ""))
-                    .Subscribe(msg => Settings.ThrottlingRateThreshold.HasValue 
-                        ? HandleMessageWithThrottling(msg)
-                        : HandleMessage(msg))
-                    .SetLogger(Logger)
-                    .Start();
+                var subscriptionSettings = GetRabbitMqSubscriptionSettings();
+                var consumerCount = Settings.ConsumerCount <= 0 ? 1 : Settings.ConsumerCount;
 
-                WriteInfoToLogAndSlack("Broker listening queue " + settings.QueueName);
+                foreach (var consumerNumber in Enumerable.Range(1, consumerCount))
+                {
+                    var rabbitMqSubscriber = new RabbitMqSubscriber<TMessage>(subscriptionSettings,
+                            new ResilientErrorHandlingStrategy(Logger, subscriptionSettings, TimeSpan.FromSeconds(1)))
+                        .SetMessageDeserializer(_messageFormat == MessageFormat.Json
+                            ? new JsonMessageDeserializer<TMessage>()
+                            : (IMessageDeserializer<TMessage>)new MessagePackMessageDeserializer<TMessage>())
+                        .SetMessageReadStrategy(new MessageReadWithTemporaryQueueStrategy(RoutingKey ?? ""))
+                        .Subscribe(msg => Settings.ThrottlingRateThreshold.HasValue 
+                            ? HandleMessageWithThrottling(msg)
+                            : HandleMessage(msg))
+                        .SetLogger(Logger);
+
+                    if (!_subscribers.TryAdd(consumerNumber, rabbitMqSubscriber))
+                    {
+                        throw new InvalidOperationException(
+                            $"Subscriber #{consumerNumber} for queue {subscriptionSettings.QueueName} was already initialized");
+                    }
+
+                    rabbitMqSubscriber.Start();
+                }
+
+                WriteInfoToLogAndSlack("Broker listening queue " + subscriptionSettings.QueueName);
             }
             catch (Exception ex)
             {
@@ -113,7 +129,10 @@ namespace Lykke.MarginTrading.BrokerBase
         {
             Console.WriteLine($"Closing {ApplicationInfo.ApplicationFullName}...");
             WriteInfoToLogAndSlack("Stopping listening exchange " + ExchangeName);
-            _connector.Stop();
+            foreach (var subscriber in _subscribers.Values)
+            {
+                subscriber.Stop();
+            }
         }
 
         protected void WriteInfoToLogAndSlack(string infoMessage)
