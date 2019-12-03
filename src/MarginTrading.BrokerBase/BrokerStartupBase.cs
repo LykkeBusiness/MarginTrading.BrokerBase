@@ -16,6 +16,7 @@ using Lykke.MarginTrading.BrokerBase.Settings;
 using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
 using Lykke.SlackNotifications;
+using Lykke.Snow.Common.Startup;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -72,8 +73,11 @@ namespace Lykke.MarginTrading.BrokerBase
                     SetSettingValues(settings, Configuration);
                     return s;
                 });
+            
+            services.AddApiKeyAuth(applicationSettings.CurrentValue.MtBrokerSettings.ClientSettings);
 
             var builder = new ContainerBuilder();
+
             RegisterServices(services, applicationSettings, builder);
             ApplicationContainer = builder.Build();
 
@@ -210,6 +214,7 @@ namespace Lykke.MarginTrading.BrokerBase
         private void RegisterServices(IServiceCollection services, IReloadingManager<TApplicationSettings> applicationSettings,
             ContainerBuilder builder)
         {
+            builder.RegisterInstance(this).AsSelf().SingleInstance();
             var applicationInfo = new CurrentApplicationInfo(PlatformServices.Default.Application.ApplicationVersion,
                 ApplicationName);
             builder.RegisterInstance(applicationInfo).AsSelf().SingleInstance();
@@ -220,7 +225,9 @@ namespace Lykke.MarginTrading.BrokerBase
             var settings = applicationSettings.Nested(s => s.MtBrokerSettings);
             builder.RegisterInstance(settings).AsSelf().SingleInstance();
             builder.RegisterInstance(settings.CurrentValue).AsSelf().SingleInstance();
-
+            
+            builder.RegisterType<RabbitPoisonHandingService>().As<IRabbitPoisonHandingService>().SingleInstance();
+            
             RegisterCustomServices(services, builder, settings, Log);
             builder.Populate(services);
         }
