@@ -22,6 +22,8 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
         private IConnection _connection;
         private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
 
+        private string PoisonQueueName => $"{_rabbitMqSubscriptionSettings.QueueName}-poison";
+
         public RabbitPoisonHandingService(BrokerSettingsBase brokerSettingsBase, 
             IBrokerApplication brokerApplication, ILog log)
         {
@@ -33,11 +35,6 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
         
         public async Task PutMessagesBack()
         {
-            //todo invoke generic method
-        }
-        
-        private async Task PutMessagesBack<TMessage>()
-        {
             if (_semaphoreSlim.CurrentCount == 0)
             {
                 throw new Exception($"Cannot start the process because it was already started and not yet finished.");
@@ -45,15 +42,13 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
 
             await _semaphoreSlim.WaitAsync(TimeSpan.FromMinutes(10));
 
-            var poisonQueueName = $"{_rabbitMqSubscriptionSettings.QueueName}-poison";
-
             try
             {
                 var factory = new ConnectionFactory {Uri = _brokerSettingsBase.MtRabbitMqConnString};
                 await _log.WriteInfoAsync(nameof(RabbitPoisonHandingService), nameof(PutMessagesBack),
                     $"Trying to connect to {factory.Endpoint} ({_rabbitMqSubscriptionSettings.ExchangeName})");
 
-                var _connection = factory.CreateConnection();
+                _connection = factory.CreateConnection();
 
                 var publishingChannel = _connection.CreateModel();
                 var subscriptionChannel = _connection.CreateModel();
@@ -62,7 +57,8 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
                 publishingChannel.QueueDeclare(_rabbitMqSubscriptionSettings.QueueName,
                     _rabbitMqSubscriptionSettings.IsDurable, false, false, null);
 
-                subscriptionChannel.QueueDeclare(poisonQueueName, true, false, false, null);
+                subscriptionChannel.QueueDeclare(PoisonQueueName, 
+                    _rabbitMqSubscriptionSettings.IsDurable, false, false, null);
 
                 var consumer = new EventingBasicConsumer(subscriptionChannel);
                 consumer.Received += (ch, ea) =>
@@ -71,33 +67,34 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
 
                     if (message != null)
                     {
-                        Publish(message);
+                        publishingChannel.BasicPublish("", _brokerApplication.RoutingKey, null, message);
+                        
                         subscriptionChannel.BasicAck(ea.DeliveryTag, false);
-                    }
-                };
-                var tag = subscriptionChannel.BasicConsume(_rabbitMqSubscriptionSettings.QueueName, false,
-                    consumer);
-                await _log.WriteInfoAsync(nameof(RabbitPoisonHandingService), nameof(PutMessagesBack),
-                    $"Consumer {tag} started.");
-
-                void Publish(byte[] message)
-                {
-                    publishingChannel.BasicPublish("", "", null, message);
-
-                    if (subscriptionChannel.MessageCount(poisonQueueName) == 0)
-                    {
+                        
                         subscriptionChannel.WaitForConfirms();
                         publishingChannel.WaitForConfirms();
                         
-                        FreeResources();//todo how to free ???
+                        if (subscriptionChannel.MessageCount(PoisonQueueName) != 0)
+                        {
+                            return;
+                        }
                     }
-                }
+                    
+                    FreeResources();//todo is this kind of termination ok ??? test it!
+                };
+                
+                var tag = subscriptionChannel.BasicConsume(_rabbitMqSubscriptionSettings.QueueName, false,
+                    consumer);
+                
+                await _log.WriteInfoAsync(nameof(RabbitPoisonHandingService), nameof(PutMessagesBack),
+                    $"Consumer {tag} started.");
             }
             catch (Exception exception)
             {
                 await _log.WriteErrorAsync(nameof(RabbitPoisonHandingService), nameof(PutMessagesBack),
-                    $"Exception thrown while putting {nameof(TMessage)} messages back from poison queue. Stopping the process.",
+                    $"Exception thrown while putting messages back from poison to queue {_rabbitMqSubscriptionSettings.QueueName}. Stopping the process.",
                     exception);
+                
                 FreeResources();
             }
         }

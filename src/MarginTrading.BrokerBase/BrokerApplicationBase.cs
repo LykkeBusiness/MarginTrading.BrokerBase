@@ -29,7 +29,7 @@ namespace Lykke.MarginTrading.BrokerBase
 
         protected abstract BrokerSettingsBase Settings { get; }
         protected abstract string ExchangeName { get; }
-        protected abstract string RoutingKey { get; }
+        public abstract string RoutingKey { get; }
         protected virtual string QueuePostfix => string.Empty;
         
         protected DateTime LastMessageTime { get; private set; }

@@ -3,7 +3,9 @@ using System.IO;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Common.Log;
+using JetBrains.Annotations;
 using Lykke.AzureQueueIntegration;
+using Lykke.Common.ApiLibrary.Swagger;
 using Lykke.Logs;
 using Lykke.Logs.MsSql;
 using Lykke.Logs.MsSql.Repositories;
@@ -17,6 +19,7 @@ using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
 using Lykke.SlackNotifications;
 using Lykke.Snow.Common.Startup;
+using Lykke.Snow.Common.Startup.ApiKey;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -75,6 +78,16 @@ namespace Lykke.MarginTrading.BrokerBase
                 });
             
             services.AddApiKeyAuth(applicationSettings.CurrentValue.MtBrokerSettings.ClientSettings);
+            
+            services.AddSwaggerGen(options =>
+            {
+                options.DefaultLykkeConfiguration("v1", ApplicationName + " API");
+                
+                if (!string.IsNullOrWhiteSpace(applicationSettings.CurrentValue.MtBrokerSettings.ClientSettings?.ApiKey))
+                {
+                    options.OperationFilter<ApiKeyHeaderOperationFilter>();
+                }
+            });
 
             var builder = new ContainerBuilder();
 
@@ -89,10 +102,15 @@ namespace Lykke.MarginTrading.BrokerBase
             //if needed TSetting properties may be set
         }
 
+        [UsedImplicitly]
         public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory,
             IApplicationLifetime appLifetime)
         {
+            app.UseAuthentication();
             app.UseMvc();
+            
+            app.UseSwagger();
+            app.UseSwaggerUI(a => a.SwaggerEndpoint("/swagger/v1/swagger.json", $"{ApplicationName} Swagger"));
 
             var applications = app.ApplicationServices.GetServices<IBrokerApplication>();
 
