@@ -6,6 +6,6 @@ namespace Lykke.MarginTrading.BrokerBase.Services
 {
     public interface IRabbitPoisonHandingService
     {
-        Task PutMessagesBack();
+        Task<string> PutMessagesBack();
     }
 }
