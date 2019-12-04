@@ -3,7 +3,11 @@ using System.IO;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Common.Log;
+using JetBrains.Annotations;
 using Lykke.AzureQueueIntegration;
+using Lykke.Common.Api.Contract.Responses;
+using Lykke.Common.ApiLibrary.Middleware;
+using Lykke.Common.ApiLibrary.Swagger;
 using Lykke.Logs;
 using Lykke.Logs.MsSql;
 using Lykke.Logs.MsSql.Repositories;
@@ -16,6 +20,8 @@ using Lykke.MarginTrading.BrokerBase.Settings;
 using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
 using Lykke.SlackNotifications;
+using Lykke.Snow.Common.Startup;
+using Lykke.Snow.Common.Startup.ApiKey;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -73,7 +79,23 @@ namespace Lykke.MarginTrading.BrokerBase
                     return s;
                 });
 
+            var clientSettings = new ClientSettings
+                {ApiKey = applicationSettings.CurrentValue.MtBrokerSettings.ApiKey};
+            
+            services.AddApiKeyAuth(clientSettings);
+            
+            services.AddSwaggerGen(options =>
+            {
+                options.DefaultLykkeConfiguration("v1", ApplicationName + " API");
+                
+                if (!string.IsNullOrWhiteSpace(clientSettings.ApiKey))
+                {
+                    options.OperationFilter<ApiKeyHeaderOperationFilter>();
+                }
+            });
+
             var builder = new ContainerBuilder();
+
             RegisterServices(services, applicationSettings, builder);
             ApplicationContainer = builder.Build();
 
@@ -85,10 +107,21 @@ namespace Lykke.MarginTrading.BrokerBase
             //if needed TSetting properties may be set
         }
 
+        [UsedImplicitly]
         public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory,
             IApplicationLifetime appLifetime)
         {
+#if DEBUG
+            app.UseLykkeMiddleware(PlatformServices.Default.Application.ApplicationName, ex => ex.ToString());
+#else
+                app.UseLykkeMiddleware(PlatformServices.Default.Application.ApplicationName, ex => new ErrorResponse {ErrorMessage = ex.Message});
+#endif
+            
+            app.UseAuthentication();
             app.UseMvc();
+            
+            app.UseSwagger();
+            app.UseSwaggerUI(a => a.SwaggerEndpoint("/swagger/v1/swagger.json", $"{ApplicationName} Swagger"));
 
             var applications = app.ApplicationServices.GetServices<IBrokerApplication>();
 
@@ -210,6 +243,7 @@ namespace Lykke.MarginTrading.BrokerBase
         private void RegisterServices(IServiceCollection services, IReloadingManager<TApplicationSettings> applicationSettings,
             ContainerBuilder builder)
         {
+            builder.RegisterInstance(this).AsSelf().SingleInstance();
             var applicationInfo = new CurrentApplicationInfo(PlatformServices.Default.Application.ApplicationVersion,
                 ApplicationName);
             builder.RegisterInstance(applicationInfo).AsSelf().SingleInstance();
@@ -219,8 +253,10 @@ namespace Lykke.MarginTrading.BrokerBase
 
             var settings = applicationSettings.Nested(s => s.MtBrokerSettings);
             builder.RegisterInstance(settings).AsSelf().SingleInstance();
-            builder.RegisterInstance(settings.CurrentValue).AsSelf().SingleInstance();
-
+            builder.RegisterInstance(settings.CurrentValue).As<BrokerSettingsBase>().AsSelf().SingleInstance();
+            
+            builder.RegisterType<RabbitPoisonHandingService>().As<IRabbitPoisonHandingService>().SingleInstance();
+            
             RegisterCustomServices(services, builder, settings, Log);
             builder.Populate(services);
         }

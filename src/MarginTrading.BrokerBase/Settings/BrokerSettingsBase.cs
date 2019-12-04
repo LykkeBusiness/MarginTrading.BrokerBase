@@ -1,5 +1,6 @@
 ﻿using JetBrains.Annotations;
 using Lykke.SettingsReader.Attributes;
+using Lykke.Snow.Common.Startup.ApiKey;
 
 namespace Lykke.MarginTrading.BrokerBase.Settings
 {
@@ -19,5 +20,8 @@ namespace Lykke.MarginTrading.BrokerBase.Settings
 
         [Optional] 
         public int ConsumerCount { get; set; } = 1;
+        
+        [Optional] 
+        public string ApiKey { get; set; }
     }
 }
