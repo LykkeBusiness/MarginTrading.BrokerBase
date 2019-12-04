@@ -21,6 +21,7 @@ namespace Lykke.MarginTrading.BrokerBase.Settings
         [Optional] 
         public int ConsumerCount { get; set; } = 1;
         
-        public ClientSettings ClientSettings { get; set; }
+        [Optional] 
+        public string ApiKey { get; set; }
     }
 }

@@ -5,6 +5,8 @@ using Autofac.Extensions.DependencyInjection;
 using Common.Log;
 using JetBrains.Annotations;
 using Lykke.AzureQueueIntegration;
+using Lykke.Common.Api.Contract.Responses;
+using Lykke.Common.ApiLibrary.Middleware;
 using Lykke.Common.ApiLibrary.Swagger;
 using Lykke.Logs;
 using Lykke.Logs.MsSql;
@@ -76,14 +78,17 @@ namespace Lykke.MarginTrading.BrokerBase
                     SetSettingValues(settings, Configuration);
                     return s;
                 });
+
+            var clientSettings = new ClientSettings
+                {ApiKey = applicationSettings.CurrentValue.MtBrokerSettings.ApiKey};
             
-            services.AddApiKeyAuth(applicationSettings.CurrentValue.MtBrokerSettings.ClientSettings);
+            services.AddApiKeyAuth(clientSettings);
             
             services.AddSwaggerGen(options =>
             {
                 options.DefaultLykkeConfiguration("v1", ApplicationName + " API");
                 
-                if (!string.IsNullOrWhiteSpace(applicationSettings.CurrentValue.MtBrokerSettings.ClientSettings?.ApiKey))
+                if (!string.IsNullOrWhiteSpace(clientSettings.ApiKey))
                 {
                     options.OperationFilter<ApiKeyHeaderOperationFilter>();
                 }
@@ -106,6 +111,12 @@ namespace Lykke.MarginTrading.BrokerBase
         public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory,
             IApplicationLifetime appLifetime)
         {
+#if DEBUG
+            app.UseLykkeMiddleware(PlatformServices.Default.Application.ApplicationName, ex => ex.ToString());
+#else
+                app.UseLykkeMiddleware(PlatformServices.Default.Application.ApplicationName, ex => new ErrorResponse {ErrorMessage = ex.Message});
+#endif
+            
             app.UseAuthentication();
             app.UseMvc();
             
