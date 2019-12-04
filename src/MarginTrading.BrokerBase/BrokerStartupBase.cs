@@ -253,7 +253,7 @@ namespace Lykke.MarginTrading.BrokerBase
 
             var settings = applicationSettings.Nested(s => s.MtBrokerSettings);
             builder.RegisterInstance(settings).AsSelf().SingleInstance();
-            builder.RegisterInstance(settings.CurrentValue).AsSelf().SingleInstance();
+            builder.RegisterInstance(settings.CurrentValue).As<BrokerSettingsBase>().AsSelf().SingleInstance();
             
             builder.RegisterType<RabbitPoisonHandingService>().As<IRabbitPoisonHandingService>().SingleInstance();
             

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Common.Log;
@@ -9,6 +10,7 @@ using Lykke.RabbitMqBroker.Publisher;
 using Lykke.RabbitMqBroker.Subscriber;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Framing;
 
 namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
 {
@@ -33,7 +35,7 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
             _log = log;
         }
         
-        public async Task PutMessagesBack()
+        public async Task<string> PutMessagesBack()
         {
             if (_semaphoreSlim.CurrentCount == 0)
             {
@@ -54,11 +56,35 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
                 var subscriptionChannel = _connection.CreateModel();
                 _channels.AddRange(new[] {publishingChannel, subscriptionChannel});
 
-                publishingChannel.QueueDeclare(_rabbitMqSubscriptionSettings.QueueName,
+                var publishingArgs = new Dictionary<string, object>()
+                {
+                    {"x-dead-letter-exchange", _rabbitMqSubscriptionSettings.DeadLetterExchangeName}
+                };
+
+                subscriptionChannel.QueueDeclare(PoisonQueueName,
                     _rabbitMqSubscriptionSettings.IsDurable, false, false, null);
 
-                subscriptionChannel.QueueDeclare(PoisonQueueName, 
-                    _rabbitMqSubscriptionSettings.IsDurable, false, false, null);
+                var messagesFound = subscriptionChannel.MessageCount(PoisonQueueName);
+                var processedMessages = 0;
+                var result = "Undefined";
+
+                if (messagesFound == 0)
+                {
+                    result = "No messages found in poison queue. Terminating the process.";
+                    
+                    await _log.WriteWarningAsync(nameof(RabbitPoisonHandingService), nameof(PutMessagesBack),
+                        $"No messages found in poison queue. Terminating the process.");
+                    FreeResources();
+                    return result;
+                }
+                else
+                {
+                    await _log.WriteInfoAsync(nameof(RabbitPoisonHandingService), nameof(PutMessagesBack),
+                        $"{messagesFound} messages found in poison queue. Starting the process.");
+                }
+
+                publishingChannel.QueueDeclare(_rabbitMqSubscriptionSettings.QueueName,
+                    _rabbitMqSubscriptionSettings.IsDurable, false, false, publishingArgs);
 
                 var consumer = new EventingBasicConsumer(subscriptionChannel);
                 consumer.Received += (ch, ea) =>
@@ -67,35 +93,56 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
 
                     if (message != null)
                     {
-                        publishingChannel.BasicPublish("", _brokerApplication.RoutingKey, null, message);
-                        
+                        var properties = new BasicProperties {Type = _brokerApplication.RoutingKey};
+
+                        publishingChannel.BasicPublish(_rabbitMqSubscriptionSettings.ExchangeName,
+                            _brokerApplication.RoutingKey, properties, message);
+
                         subscriptionChannel.BasicAck(ea.DeliveryTag, false);
-                        
-                        subscriptionChannel.WaitForConfirms();
-                        publishingChannel.WaitForConfirms();
-                        
-                        if (subscriptionChannel.MessageCount(PoisonQueueName) != 0)
-                        {
-                            return;
-                        }
+
+                        processedMessages++;
                     }
-                    
-                    FreeResources();//todo is this kind of termination ok ??? test it!
                 };
+
+                var sw = new Stopwatch();
+                sw.Start();
                 
-                var tag = subscriptionChannel.BasicConsume(_rabbitMqSubscriptionSettings.QueueName, false,
+                var tag = subscriptionChannel.BasicConsume(PoisonQueueName, false,
                     consumer);
-                
+
                 await _log.WriteInfoAsync(nameof(RabbitPoisonHandingService), nameof(PutMessagesBack),
                     $"Consumer {tag} started.");
+
+                while (processedMessages < messagesFound)
+                {
+                    Thread.Sleep(100);
+
+                    if (sw.ElapsedMilliseconds > 30000)
+                    {
+                        await _log.WriteWarningAsync(nameof(RabbitPoisonHandingService), nameof(PutMessagesBack),
+                            $"Messages resend takes more than 30s. Terminating the process.");
+
+                        break;
+                    }
+                }
+
+                result =
+                    $"Messages resend finished. Initial number of messages {messagesFound}. Processed number of messages {processedMessages}";
+                
+                await _log.WriteInfoAsync(nameof(RabbitPoisonHandingService), nameof(PutMessagesBack), result);
+                
+                FreeResources();
+
+                return result;
             }
             catch (Exception exception)
             {
-                await _log.WriteErrorAsync(nameof(RabbitPoisonHandingService), nameof(PutMessagesBack),
-                    $"Exception thrown while putting messages back from poison to queue {_rabbitMqSubscriptionSettings.QueueName}. Stopping the process.",
-                    exception);
+                var result =
+                    $"Exception [{exception.Message}] thrown while putting messages back from poison to queue {_rabbitMqSubscriptionSettings.QueueName}. Stopping the process.";
                 
-                FreeResources();
+                await _log.WriteErrorAsync(nameof(RabbitPoisonHandingService), nameof(PutMessagesBack), result, exception);
+
+                return result;
             }
         }
 

@@ -17,9 +17,9 @@ namespace Lykke.MarginTrading.BrokerBase.Controllers
         }
 
         [HttpPost("put-messages-back")]
-        public async Task PutMessagesBack()
+        public async Task<string> PutMessagesBack()
         {
-            await _rabbitPoisonHandingService.PutMessagesBack();
+            return await _rabbitPoisonHandingService.PutMessagesBack();
         }
     }
 }
