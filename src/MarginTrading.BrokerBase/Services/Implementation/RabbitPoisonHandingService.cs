@@ -93,14 +93,23 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
 
                     if (message != null)
                     {
-                        var properties = new BasicProperties {Type = _brokerApplication.RoutingKey};
+                        try
+                        {
+                            var properties = !string.IsNullOrEmpty(_brokerApplication.RoutingKey)
+                                ? new BasicProperties {Type = _brokerApplication.RoutingKey}
+                                : null;
 
-                        publishingChannel.BasicPublish(_rabbitMqSubscriptionSettings.ExchangeName,
-                            _brokerApplication.RoutingKey, properties, message);
+                            publishingChannel.BasicPublish(_rabbitMqSubscriptionSettings.ExchangeName,
+                                _brokerApplication.RoutingKey ?? "", properties, message);
 
-                        subscriptionChannel.BasicAck(ea.DeliveryTag, false);
+                            subscriptionChannel.BasicAck(ea.DeliveryTag, false);
 
-                        processedMessages++;
+                            processedMessages++;
+                        }
+                        catch (Exception e)
+                        {
+                            _log.WriteErrorAsync(nameof(RabbitPoisonHandingService), nameof(PutMessagesBack), $"Error resending message: {e.Message}", e);
+                        }
                     }
                 };
 
