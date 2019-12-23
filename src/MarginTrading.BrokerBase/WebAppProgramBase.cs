@@ -9,14 +9,18 @@ namespace Lykke.MarginTrading.BrokerBase
     {
         protected static void RunOnPort(short listeningPort)
         {
-            void RunHost() =>
-                new WebHostBuilder()
+            void RunHost()
+            {
+                Hosting.WebHost = new WebHostBuilder()
                     .UseKestrel()
                     .UseUrls("http://*:" + listeningPort)
                     .UseContentRoot(Directory.GetCurrentDirectory())
                     .UseStartup<TStartup>()
-                    .Build()
-                    .Run();
+                    .Build();
+
+                Hosting.WebHost.Run();
+            };
+
 
             StartWithRetries(RunHost);
         }
