@@ -89,6 +89,8 @@ namespace Lykke.MarginTrading.BrokerBase
                 }
             });
 
+            services.AddSingleton<ILoggerFactory>(x => new WebHostLoggerFactory(Log));
+
             var builder = new ContainerBuilder();
 
             RegisterServices(services, applicationSettings, builder);
