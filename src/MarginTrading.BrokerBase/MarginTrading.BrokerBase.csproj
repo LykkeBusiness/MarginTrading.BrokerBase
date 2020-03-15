@@ -8,7 +8,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="7.0.1" />
-    <PackageReference Include="Lykke.Snow.Common.Startup" Version="1.2.14" />
+    <PackageReference Include="Lykke.Snow.Common.Startup" Version="1.2.17" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="Dapper" Version="1.50.5" />
     <PackageReference Include="Flurl.Http" Version="2.3.1" />
