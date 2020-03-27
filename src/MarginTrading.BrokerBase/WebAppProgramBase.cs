@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
+using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
 namespace Lykke.MarginTrading.BrokerBase
 {
@@ -11,14 +13,21 @@ namespace Lykke.MarginTrading.BrokerBase
         {
             void RunHost()
             {
-                Hosting.WebHost = new WebHostBuilder()
-                    .UseKestrel()
-                    .UseUrls("http://*:" + listeningPort)
-                    .UseContentRoot(Directory.GetCurrentDirectory())
-                    .UseStartup<TStartup>()
-                    .Build();
+                Hosting.AppHost = Host.CreateDefaultBuilder()
+                        .UseServiceProviderFactory(new AutofacServiceProviderFactory())
+                        .ConfigureWebHostDefaults(webBuilder =>
+                        {
+                            webBuilder.ConfigureKestrel(serverOptions =>
+                                {
+                                    // Set properties and call methods on options
+                                })
+                                .UseStartup<TStartup>()
+                                .UseUrls("http://*:" + listeningPort)
+                                .UseContentRoot(Directory.GetCurrentDirectory());
+                        })
+                        .Build();
 
-                Hosting.WebHost.Run();
+                Hosting.AppHost.Run();
             };
 
 
