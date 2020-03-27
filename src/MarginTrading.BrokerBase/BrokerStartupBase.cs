@@ -128,6 +128,7 @@ namespace Lykke.MarginTrading.BrokerBase
 
             app.UseRouting();
             app.UseAuthentication();
+            app.UseAuthentication();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
