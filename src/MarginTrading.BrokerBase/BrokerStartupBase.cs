@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -12,6 +13,7 @@ using Lykke.Logs;
 using Lykke.Logs.MsSql;
 using Lykke.Logs.MsSql.Repositories;
 using Lykke.Logs.Serilog;
+using Lykke.MarginTrading.BrokerBase.Controllers;
 using Lykke.MarginTrading.BrokerBase.Extensions;
 using Lykke.MarginTrading.BrokerBase.Models;
 using Lykke.MarginTrading.BrokerBase.Services;
@@ -30,18 +32,20 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Serialization;
 
 namespace Lykke.MarginTrading.BrokerBase
 {
-    public abstract class BrokerStartupBase<TApplicationSettings, TSettings>
+    public abstract class  BrokerStartupBase<TApplicationSettings, TSettings>
         where TApplicationSettings : class, IBrokerApplicationSettings<TSettings>
         where TSettings : BrokerSettingsBase
     {
+        protected IReloadingManager<TApplicationSettings> _appSettings;
         public IConfigurationRoot Configuration { get; }
         public IHostingEnvironment Environment { get; }
-        public IContainer ApplicationContainer { get; private set; }
+        public ILifetimeScope ApplicationContainer { get; private set; }
         public ILog Log { get; private set; }
-
         protected abstract string ApplicationName { get; }
 
         protected BrokerStartupBase(IHostingEnvironment env)
@@ -56,12 +60,19 @@ namespace Lykke.MarginTrading.BrokerBase
             Environment = env;
         }
 
-        public IServiceProvider ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services)
         {
+            services
+                .AddControllers()
+                .AddApplicationPart(typeof(Hosting).Assembly)
+                .AddNewtonsoftJson(options =>
+                {
+                    options.SerializerSettings.ContractResolver = new DefaultContractResolver();
+                });
+            
             services.AddSingleton(Configuration);
-            services.AddMvc();
 
-            var applicationSettings = Configuration.LoadSettings<TApplicationSettings>(
+            _appSettings = Configuration.LoadSettings<TApplicationSettings>(
                     throwExceptionOnCheckError: !Configuration.NotThrowExceptionsOnServiceValidation())
                 .Nested(s =>
                 {
@@ -75,7 +86,7 @@ namespace Lykke.MarginTrading.BrokerBase
                 });
 
             var clientSettings = new ClientSettings
-            { ApiKey = applicationSettings.CurrentValue.MtBrokerSettings.ApiKey };
+            { ApiKey = _appSettings.CurrentValue.MtBrokerSettings.ApiKey };
 
             services.AddApiKeyAuth(clientSettings);
 
@@ -88,15 +99,15 @@ namespace Lykke.MarginTrading.BrokerBase
                     options.OperationFilter<ApiKeyHeaderOperationFilter>();
                 }
             });
+            
+            Log = CreateLogWithSlack(
+                services,
+                _appSettings,
+                new CurrentApplicationInfo(
+                    PlatformServices.Default.Application.ApplicationVersion,
+                    ApplicationName));
 
             services.AddSingleton<ILoggerFactory>(x => new WebHostLoggerFactory(Log));
-
-            var builder = new ContainerBuilder();
-
-            RegisterServices(services, applicationSettings, builder);
-            ApplicationContainer = builder.Build();
-
-            return new AutofacServiceProvider(ApplicationContainer);
         }
 
         protected virtual void SetSettingValues(TSettings source, IConfigurationRoot configuration)
@@ -107,30 +118,42 @@ namespace Lykke.MarginTrading.BrokerBase
         [UsedImplicitly]
         public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env, IApplicationLifetime appLifetime)
         {
+            ApplicationContainer = app.ApplicationServices.GetAutofacRoot();
+            
 #if DEBUG
             app.UseLykkeMiddleware(PlatformServices.Default.Application.ApplicationName, ex => ex.ToString());
 #else
-                app.UseLykkeMiddleware(PlatformServices.Default.Application.ApplicationName, ex => new ErrorResponse {ErrorMessage = ex.Message});
+            app.UseLykkeMiddleware(PlatformServices.Default.Application.ApplicationName, ex => new ErrorResponse {ErrorMessage = ex.Message});
 #endif
 
+            app.UseRouting();
             app.UseAuthentication();
-            app.UseMvc();
-
-            app.UseSwagger();
+            app.UseAuthorization();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
+            app.UseSwagger(c =>
+            {
+                c.PreSerializeFilters.Add((swagger, httpReq) =>
+                    swagger.Servers = new List<OpenApiServer> {
+                        new OpenApiServer { Url = $"{httpReq.Scheme}://{httpReq.Host.Value}" }
+                    });
+            });
             app.UseSwaggerUI(a => a.SwaggerEndpoint("/swagger/v1/swagger.json", $"{ApplicationName} Swagger"));
 
             var applications = app.ApplicationServices.GetServices<IBrokerApplication>();
 
-            appLifetime.ApplicationStarted.Register(async () =>
+            appLifetime.ApplicationStarted.Register(() =>
             {
                 foreach (var application in applications)
                 {
                     application.Run();
                 }
 
-                await Hosting.WebHost.WriteLogsAsync(Environment, Log);
+                Hosting.AppHost.WriteLogs(Environment, Log);
 
-                await Log.WriteMonitorAsync("", "", $"Started");
+                Log.WriteMonitor("", "", $"Started");
             });
 
             appLifetime.ApplicationStopping.Register(() =>
@@ -141,18 +164,18 @@ namespace Lykke.MarginTrading.BrokerBase
                 }
             });
 
-            appLifetime.ApplicationStopped.Register(async () =>
+            appLifetime.ApplicationStopped.Register(() =>
             {
                 if (Log != null)
                 {
-                    await Log.WriteMonitorAsync("", "", $"Terminating");
+                    Log.WriteMonitor("", "", $"Terminating");
                 }
                 
                 ApplicationContainer.Dispose();
             });
         }
 
-        protected abstract void RegisterCustomServices(IServiceCollection services, ContainerBuilder builder, IReloadingManager<TSettings> settings, ILog log);
+        protected abstract void RegisterCustomServices(ContainerBuilder builder, IReloadingManager<TSettings> settings, ILog log);
 
         protected virtual ILog CreateLogWithSlack(IServiceCollection services,
             IReloadingManager<TApplicationSettings> settings, CurrentApplicationInfo applicationInfo)
@@ -238,25 +261,21 @@ namespace Lykke.MarginTrading.BrokerBase
             return aggregateLogger;
         }
 
-        private void RegisterServices(IServiceCollection services, IReloadingManager<TApplicationSettings> applicationSettings,
-            ContainerBuilder builder)
+        public void ConfigureContainer(ContainerBuilder builder)
         {
             builder.RegisterInstance(this).AsSelf().SingleInstance();
-            var applicationInfo = new CurrentApplicationInfo(PlatformServices.Default.Application.ApplicationVersion,
-                ApplicationName);
-            builder.RegisterInstance(applicationInfo).AsSelf().SingleInstance();
-            Log = CreateLogWithSlack(services, applicationSettings, applicationInfo);
+            builder.RegisterInstance(new CurrentApplicationInfo(PlatformServices.Default.Application.ApplicationVersion,
+                ApplicationName)).AsSelf().SingleInstance();
             builder.RegisterInstance(Log).As<ILog>().SingleInstance();
-            builder.RegisterInstance(applicationSettings).AsSelf().SingleInstance();
+            builder.RegisterInstance(_appSettings).AsSelf().SingleInstance();
 
-            var settings = applicationSettings.Nested(s => s.MtBrokerSettings);
+            var settings = _appSettings.Nested(s => s.MtBrokerSettings);
             builder.RegisterInstance(settings).AsSelf().SingleInstance();
             builder.RegisterInstance(settings.CurrentValue).As<BrokerSettingsBase>().AsSelf().SingleInstance();
             
             builder.RegisterType<RabbitPoisonHandingService>().As<IRabbitPoisonHandingService>().SingleInstance();
             
-            RegisterCustomServices(services, builder, settings, Log);
-            builder.Populate(services);
+            RegisterCustomServices(builder, settings, Log);
         }
     }
 }
