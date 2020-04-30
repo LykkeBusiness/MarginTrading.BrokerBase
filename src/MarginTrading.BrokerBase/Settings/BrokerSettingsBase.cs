@@ -1,6 +1,5 @@
 ﻿using JetBrains.Annotations;
 using Lykke.SettingsReader.Attributes;
-using Lykke.Snow.Common.Startup.ApiKey;
 
 namespace Lykke.MarginTrading.BrokerBase.Settings
 {

@@ -13,7 +13,6 @@ using Lykke.Logs;
 using Lykke.Logs.MsSql;
 using Lykke.Logs.MsSql.Repositories;
 using Lykke.Logs.Serilog;
-using Lykke.MarginTrading.BrokerBase.Controllers;
 using Lykke.MarginTrading.BrokerBase.Extensions;
 using Lykke.MarginTrading.BrokerBase.Models;
 using Lykke.MarginTrading.BrokerBase.Services;
@@ -96,7 +95,7 @@ namespace Lykke.MarginTrading.BrokerBase
 
                 if (!string.IsNullOrWhiteSpace(clientSettings.ApiKey))
                 {
-                    options.OperationFilter<ApiKeyHeaderOperationFilter>();
+                    options.AddApiKeyAwareness();
                 }
             });
             
