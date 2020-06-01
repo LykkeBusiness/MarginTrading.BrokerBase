@@ -44,7 +44,7 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
 
             try
             {
-                var factory = new ConnectionFactory {Uri = _brokerSettingsBase.MtRabbitMqConnString};
+                var factory = new ConnectionFactory {Uri = new Uri(_brokerSettingsBase.MtRabbitMqConnString, UriKind.Absolute)};
                 await _log.WriteInfoAsync(nameof(RabbitPoisonHandingService), nameof(PutMessagesBack),
                     $"Trying to connect to {factory.Endpoint} ({_rabbitMqSubscriptionSettings.ExchangeName})");
 

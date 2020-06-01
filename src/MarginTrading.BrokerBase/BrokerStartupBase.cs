@@ -26,13 +26,15 @@ using Lykke.Snow.Common.Startup.ApiKey;
 using Lykke.Snow.Common.Startup.Hosting;
 using Lykke.Snow.Common.Startup.Log;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
+using IApplicationLifetime = Microsoft.AspNetCore.Hosting.IApplicationLifetime;
+using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
 namespace Lykke.MarginTrading.BrokerBase
 {
@@ -42,12 +44,12 @@ namespace Lykke.MarginTrading.BrokerBase
     {
         protected IReloadingManager<TApplicationSettings> _appSettings;
         public IConfigurationRoot Configuration { get; }
-        public IHostingEnvironment Environment { get; }
+        public IHostEnvironment Environment { get; }
         public ILifetimeScope ApplicationContainer { get; private set; }
         public ILog Log { get; private set; }
         protected abstract string ApplicationName { get; }
 
-        protected BrokerStartupBase(IHostingEnvironment env)
+        protected BrokerStartupBase(IHostEnvironment env)
         {
             Configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -115,7 +117,7 @@ namespace Lykke.MarginTrading.BrokerBase
         }
 
         [UsedImplicitly]
-        public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env, IApplicationLifetime appLifetime)
+        public virtual void Configure(IApplicationBuilder app, IHostEnvironment env, IHostApplicationLifetime appLifetime)
         {
             ApplicationContainer = app.ApplicationServices.GetAutofacRoot();
             
@@ -260,6 +262,7 @@ namespace Lykke.MarginTrading.BrokerBase
             return aggregateLogger;
         }
 
+        [UsedImplicitly]
         public void ConfigureContainer(ContainerBuilder builder)
         {
             builder.RegisterInstance(this).AsSelf().SingleInstance();
