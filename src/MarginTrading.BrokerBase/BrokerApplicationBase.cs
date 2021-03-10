@@ -126,7 +126,7 @@ namespace Lykke.MarginTrading.BrokerBase
         private RabbitMqSubscriber<TMessage> BuildSubscriber(RabbitMqSubscriptionSettings subscriptionSettings,
             Func<TMessage, Task> basicHandler, Func<TMessage, Task> throttlingHandler)
             => new RabbitMqSubscriber<TMessage>(subscriptionSettings,
-                    new ResilientErrorHandlingStrategy(Logger, subscriptionSettings, TimeSpan.FromSeconds(1)))
+                    GetErrorHandlingStrategy(subscriptionSettings))
                 .SetMessageDeserializer(MessageDeserializer)
                 .SetMessageReadStrategy(new MessageReadWithTemporaryQueueStrategy(RoutingKey ?? ""))
                 .Subscribe(msg => Settings.ThrottlingRateThreshold.HasValue
