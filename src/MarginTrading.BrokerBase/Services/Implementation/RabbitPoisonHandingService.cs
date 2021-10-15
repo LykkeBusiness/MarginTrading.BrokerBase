@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Common.Log;
 using Lykke.MarginTrading.BrokerBase.Settings;
+using Lykke.RabbitMqBroker;
 using Lykke.RabbitMqBroker.Subscriber;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;

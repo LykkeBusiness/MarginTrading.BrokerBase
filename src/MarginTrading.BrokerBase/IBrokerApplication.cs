@@ -1,4 +1,5 @@
-﻿using Lykke.RabbitMqBroker.Subscriber;
+﻿using Lykke.RabbitMqBroker;
+using Lykke.RabbitMqBroker.Subscriber;
 
 namespace Lykke.MarginTrading.BrokerBase
 {
