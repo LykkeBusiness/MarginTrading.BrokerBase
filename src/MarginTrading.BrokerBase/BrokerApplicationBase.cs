@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Common;
@@ -9,19 +11,25 @@ using Lykke.MarginTrading.BrokerBase.Extensions;
 using Lykke.MarginTrading.BrokerBase.Models;
 using Lykke.MarginTrading.BrokerBase.Settings;
 using Lykke.RabbitMqBroker;
-using Lykke.RabbitMqBroker.Publisher;
+using Lykke.RabbitMqBroker.Publisher.Serializers;
 using Lykke.RabbitMqBroker.Subscriber;
+using Lykke.RabbitMqBroker.Subscriber.Deserializers;
+using Lykke.RabbitMqBroker.Subscriber.MessageReadStrategies;
+using Lykke.RabbitMqBroker.Subscriber.Middleware;
+using Lykke.RabbitMqBroker.Subscriber.Middleware.ErrorHandling;
 using Lykke.SlackNotifications;
+using Microsoft.Extensions.Logging;
 
 namespace Lykke.MarginTrading.BrokerBase
 {
     [UsedImplicitly]
     public abstract class BrokerApplicationBase<TMessage> : IBrokerApplication
     {
+        protected readonly ILoggerFactory LoggerFactory;
         protected readonly ILog Logger;
         private readonly ISlackNotificationsSender _slackNotificationsSender;
         protected readonly CurrentApplicationInfo ApplicationInfo;
-        private readonly ConcurrentDictionary<int, IStopable> _subscribers = new ConcurrentDictionary<int, IStopable>();
+        private readonly ConcurrentDictionary<int, IStartStop> _subscribers = new ConcurrentDictionary<int, IStartStop>();
         protected readonly IMessageDeserializer<TMessage> MessageDeserializer;
         protected readonly IRabbitMqSerializer<TMessage> MessageSerializer;
 
@@ -32,9 +40,10 @@ namespace Lykke.MarginTrading.BrokerBase
         
         protected DateTime LastMessageTime { get; private set; }
 
-        protected BrokerApplicationBase(ILog logger, ISlackNotificationsSender slackNotificationsSender,
+        protected BrokerApplicationBase(ILoggerFactory loggerFactory, ILog logger, ISlackNotificationsSender slackNotificationsSender,
             CurrentApplicationInfo applicationInfo, MessageFormat messageFormat = MessageFormat.Json)
         {
+            LoggerFactory = loggerFactory;
             Logger = logger;
             _slackNotificationsSender = slackNotificationsSender;
             ApplicationInfo = applicationInfo;
@@ -65,6 +74,8 @@ namespace Lykke.MarginTrading.BrokerBase
 
         protected abstract Task HandleMessage(TMessage message);
 
+        protected virtual Action<IDictionary<string, object>> ReadHeadersAction => null;
+
         private Task HandleMessageWithThrottling(TMessage message)
         {
             var messageTime = DateTime.UtcNow;
@@ -83,14 +94,21 @@ namespace Lykke.MarginTrading.BrokerBase
         /// Override if own strategy required.
         /// </summary>
         [UsedImplicitly]
-        protected virtual IErrorHandlingStrategy GetErrorHandlingStrategy(RabbitMqSubscriptionSettings settings)
+        protected virtual IEnumerable<IEventMiddleware<TMessage>> GetMiddlewares<TMessage>(RabbitMqSubscriptionSettings settings)
         {
-            return GetDefaultErrorHandlingStrategy(settings);
+            return GetDefaultMiddlewares<TMessage>(settings);
         }
 
-        protected IErrorHandlingStrategy GetDefaultErrorHandlingStrategy(RabbitMqSubscriptionSettings settings) =>
-            new ResilientErrorHandlingStrategy(Logger, settings, TimeSpan.FromSeconds(1),
-                next: new DeadQueueErrorHandlingStrategy(Logger, settings));
+        protected IEnumerable<IEventMiddleware<TMessage>> GetDefaultMiddlewares<TMessage>(RabbitMqSubscriptionSettings settings)
+        {
+            return new List<IEventMiddleware<TMessage>>
+            {
+                new ResilientErrorHandlingMiddleware<TMessage>(
+                    LoggerFactory.CreateLogger<ResilientErrorHandlingMiddleware<TMessage>>(),
+                    TimeSpan.FromSeconds(1)),
+                new DeadQueueMiddleware<TMessage>(LoggerFactory.CreateLogger<DeadQueueMiddleware<TMessage>>())
+            };
+        }
 
         public virtual void Run()
         {
@@ -125,14 +143,28 @@ namespace Lykke.MarginTrading.BrokerBase
 
         private RabbitMqSubscriber<TMessage> BuildSubscriber(RabbitMqSubscriptionSettings subscriptionSettings,
             Func<TMessage, Task> basicHandler, Func<TMessage, Task> throttlingHandler)
-            => new RabbitMqSubscriber<TMessage>(subscriptionSettings,
-                    GetErrorHandlingStrategy(subscriptionSettings))
-                .SetMessageDeserializer(MessageDeserializer)
-                .SetMessageReadStrategy(new MessageReadWithTemporaryQueueStrategy(RoutingKey ?? ""))
-                .Subscribe(msg => Settings.ThrottlingRateThreshold.HasValue
-                    ? throttlingHandler(msg)
-                    : basicHandler(msg))
-                .SetLogger(Logger);
+        {
+            var result = new RabbitMqSubscriber<TMessage>(
+                LoggerFactory.CreateLogger<RabbitMqSubscriber<TMessage>>(),
+                subscriptionSettings)
+            .SetMessageDeserializer(MessageDeserializer)
+            .SetMessageReadStrategy(new MessageReadWithTemporaryQueueStrategy(RoutingKey ?? ""))
+            .Subscribe(msg => Settings.ThrottlingRateThreshold.HasValue
+                ? throttlingHandler(msg)
+                : basicHandler(msg));
+
+            if (ReadHeadersAction != null)
+            {
+                result = result.SetReadHeadersAction(ReadHeadersAction);
+            }
+            
+            foreach (var middleware in GetMiddlewares<TMessage>(subscriptionSettings))
+            {
+                result = result.UseMiddleware(middleware);
+            }
+            
+            return result;
+        }
 
         public void StopApplication()
         {
