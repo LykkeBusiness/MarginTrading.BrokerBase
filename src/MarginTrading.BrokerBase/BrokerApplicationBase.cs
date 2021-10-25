@@ -18,6 +18,7 @@ using Lykke.RabbitMqBroker.Subscriber.MessageReadStrategies;
 using Lykke.RabbitMqBroker.Subscriber.Middleware;
 using Lykke.RabbitMqBroker.Subscriber.Middleware.ErrorHandling;
 using Lykke.SlackNotifications;
+using Lykke.Snow.Common.Correlation.RabbitMq;
 using Microsoft.Extensions.Logging;
 
 namespace Lykke.MarginTrading.BrokerBase
@@ -25,6 +26,7 @@ namespace Lykke.MarginTrading.BrokerBase
     [UsedImplicitly]
     public abstract class BrokerApplicationBase<TMessage> : IBrokerApplication
     {
+        private readonly RabbitMqCorrelationManager _correlationManager;
         protected readonly ILoggerFactory LoggerFactory;
         protected readonly ILog Logger;
         private readonly ISlackNotificationsSender _slackNotificationsSender;
@@ -40,9 +42,10 @@ namespace Lykke.MarginTrading.BrokerBase
         
         protected DateTime LastMessageTime { get; private set; }
 
-        protected BrokerApplicationBase(ILoggerFactory loggerFactory, ILog logger, ISlackNotificationsSender slackNotificationsSender,
+        protected BrokerApplicationBase(RabbitMqCorrelationManager correlationManager, ILoggerFactory loggerFactory, ILog logger, ISlackNotificationsSender slackNotificationsSender,
             CurrentApplicationInfo applicationInfo, MessageFormat messageFormat = MessageFormat.Json)
         {
+            _correlationManager = correlationManager;
             LoggerFactory = loggerFactory;
             Logger = logger;
             _slackNotificationsSender = slackNotificationsSender;
@@ -73,8 +76,6 @@ namespace Lykke.MarginTrading.BrokerBase
         }
 
         protected abstract Task HandleMessage(TMessage message);
-
-        protected virtual Action<IDictionary<string, object>> ReadHeadersAction => null;
 
         private Task HandleMessageWithThrottling(TMessage message)
         {
@@ -149,14 +150,10 @@ namespace Lykke.MarginTrading.BrokerBase
                 subscriptionSettings)
             .SetMessageDeserializer(MessageDeserializer)
             .SetMessageReadStrategy(new MessageReadWithTemporaryQueueStrategy(RoutingKey ?? ""))
+            .SetReadHeadersAction(_correlationManager.FetchCorrelationIfExists)
             .Subscribe(msg => Settings.ThrottlingRateThreshold.HasValue
                 ? throttlingHandler(msg)
                 : basicHandler(msg));
-
-            if (ReadHeadersAction != null)
-            {
-                result = result.SetReadHeadersAction(ReadHeadersAction);
-            }
             
             foreach (var middleware in GetMiddlewares<TMessage>(subscriptionSettings))
             {

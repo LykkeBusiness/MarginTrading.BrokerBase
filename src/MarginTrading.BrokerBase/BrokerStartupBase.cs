@@ -21,6 +21,8 @@ using Lykke.MarginTrading.BrokerBase.Settings;
 using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
 using Lykke.SlackNotifications;
+using Lykke.Snow.Common.Correlation;
+using Lykke.Snow.Common.Correlation.Serilog;
 using Lykke.Snow.Common.Startup;
 using Lykke.Snow.Common.Startup.ApiKey;
 using Lykke.Snow.Common.Startup.Hosting;
@@ -49,7 +51,6 @@ namespace Lykke.MarginTrading.BrokerBase
         public ILifetimeScope ApplicationContainer { get; private set; }
         public ILog Log { get; private set; }
         protected abstract string ApplicationName { get; }
-        protected virtual IEnumerable<ILogEventEnricher> SerilogEventEnrichers => null;
 
         protected BrokerStartupBase(IHostEnvironment env)
         {
@@ -103,6 +104,8 @@ namespace Lykke.MarginTrading.BrokerBase
                 }
             });
             
+            services.AddCorrelation();
+            
             Log = CreateLogWithSlack(
                 services,
                 _appSettings,
@@ -122,7 +125,8 @@ namespace Lykke.MarginTrading.BrokerBase
         public virtual void Configure(IApplicationBuilder app, IHostEnvironment env, IHostApplicationLifetime appLifetime)
         {
             ApplicationContainer = app.ApplicationServices.GetAutofacRoot();
-            
+
+            app.UseCorrelation();
 #if DEBUG
             app.UseLykkeMiddleware(PlatformServices.Default.Application.ApplicationName, ex => ex.ToString());
 #else
@@ -230,7 +234,11 @@ namespace Lykke.MarginTrading.BrokerBase
             
             if (settings.CurrentValue.MtBrokersLogs.UseSerilog)
             {
-                aggregateLogger.AddLog(new SerilogLogger(applicationInfo.GetType().Assembly, Configuration, SerilogEventEnrichers));
+                var correlationContextAccessor = services.BuildServiceProvider().GetService<CorrelationContextAccessor>();
+                aggregateLogger.AddLog(new SerilogLogger(applicationInfo.GetType().Assembly, Configuration, new List<ILogEventEnricher>
+                {
+                    new CorrelationLogEventEnricher("CorrelationId", correlationContextAccessor)
+                }));
             }
             else if (settings.CurrentValue.MtBrokersLogs.StorageMode == StorageMode.SqlServer)
             {
