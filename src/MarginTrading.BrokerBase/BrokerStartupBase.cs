@@ -33,6 +33,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
+using Serilog.Core;
 using IApplicationLifetime = Microsoft.AspNetCore.Hosting.IApplicationLifetime;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
@@ -48,6 +49,7 @@ namespace Lykke.MarginTrading.BrokerBase
         public ILifetimeScope ApplicationContainer { get; private set; }
         public ILog Log { get; private set; }
         protected abstract string ApplicationName { get; }
+        protected virtual IEnumerable<ILogEventEnricher> SerilogEventEnrichers => null;
 
         protected BrokerStartupBase(IHostEnvironment env)
         {
@@ -228,7 +230,7 @@ namespace Lykke.MarginTrading.BrokerBase
             
             if (settings.CurrentValue.MtBrokersLogs.UseSerilog)
             {
-                aggregateLogger.AddLog(new SerilogLogger(applicationInfo.GetType().Assembly, Configuration));
+                aggregateLogger.AddLog(new SerilogLogger(applicationInfo.GetType().Assembly, Configuration, SerilogEventEnrichers));
             }
             else if (settings.CurrentValue.MtBrokersLogs.StorageMode == StorageMode.SqlServer)
             {
