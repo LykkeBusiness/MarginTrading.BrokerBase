@@ -22,6 +22,9 @@ using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
 using Lykke.SlackNotifications;
 using Lykke.Snow.Common.Correlation;
+using Lykke.Snow.Common.Correlation.Cqrs;
+using Lykke.Snow.Common.Correlation.Http;
+using Lykke.Snow.Common.Correlation.RabbitMq;
 using Lykke.Snow.Common.Correlation.Serilog;
 using Lykke.Snow.Common.Startup;
 using Lykke.Snow.Common.Startup.ApiKey;
@@ -103,15 +106,20 @@ namespace Lykke.MarginTrading.BrokerBase
                     options.AddApiKeyAwareness();
                 }
             });
-            
-            services.AddCorrelation();
+
+            var correlationContextAccessor = new CorrelationContextAccessor();
+            services.AddSingleton(correlationContextAccessor);
+            services.AddSingleton<RabbitMqCorrelationManager>();
+            services.AddSingleton<CqrsCorrelationManager>();
+            services.AddTransient<HttpCorrelationHandler>();
             
             Log = CreateLogWithSlack(
                 services,
                 _appSettings,
                 new CurrentApplicationInfo(
                     PlatformServices.Default.Application.ApplicationVersion,
-                    ApplicationName));
+                    ApplicationName),
+                correlationContextAccessor);
 
             services.AddSingleton<ILoggerFactory>(x => new WebHostLoggerFactory(Log));
         }
@@ -185,7 +193,8 @@ namespace Lykke.MarginTrading.BrokerBase
         protected abstract void RegisterCustomServices(ContainerBuilder builder, IReloadingManager<TSettings> settings, ILog log);
 
         protected virtual ILog CreateLogWithSlack(IServiceCollection services,
-            IReloadingManager<TApplicationSettings> settings, CurrentApplicationInfo applicationInfo)
+            IReloadingManager<TApplicationSettings> settings, CurrentApplicationInfo applicationInfo,
+            CorrelationContextAccessor correlationContextAccessor)
         {
             var logTableName = ApplicationName + applicationInfo.EnvInfo + "Log"; 
             var aggregateLogger = new AggregateLogger();
@@ -234,7 +243,6 @@ namespace Lykke.MarginTrading.BrokerBase
             
             if (settings.CurrentValue.MtBrokersLogs.UseSerilog)
             {
-                var correlationContextAccessor = services.BuildServiceProvider().GetService<CorrelationContextAccessor>();
                 aggregateLogger.AddLog(new SerilogLogger(applicationInfo.GetType().Assembly, Configuration, new List<ILogEventEnricher>
                 {
                     new CorrelationLogEventEnricher("CorrelationId", correlationContextAccessor)
