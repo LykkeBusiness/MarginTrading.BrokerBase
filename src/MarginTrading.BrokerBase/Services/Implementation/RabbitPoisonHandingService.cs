@@ -94,9 +94,20 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
                     {
                         try
                         {
-                            var properties = !string.IsNullOrEmpty(_brokerApplication.RoutingKey)
-                                ? new BasicProperties {Type = _brokerApplication.RoutingKey}
-                                : null;
+                            IBasicProperties properties = null;
+                            if (!string.IsNullOrEmpty(_brokerApplication.RoutingKey) ||
+                                ea.BasicProperties?.Headers?.Count > 0)
+                            {
+                                properties = new BasicProperties();
+                                if (!string.IsNullOrEmpty(_brokerApplication.RoutingKey))
+                                {
+                                    properties.Type = _brokerApplication.RoutingKey;
+                                }
+                                if (ea.BasicProperties?.Headers?.Count > 0)
+                                {
+                                    properties.Headers = ea.BasicProperties.Headers;
+                                }
+                            }
 
                             publishingChannel.BasicPublish(_rabbitMqSubscriptionSettings.ExchangeName,
                                 _brokerApplication.RoutingKey ?? "", properties, message);
