@@ -104,10 +104,10 @@ namespace Lykke.MarginTrading.BrokerBase
         {
             return new List<IEventMiddleware<TMessage>>
             {
+                new DeadQueueMiddleware<TMessage>(LoggerFactory.CreateLogger<DeadQueueMiddleware<TMessage>>()),
                 new ResilientErrorHandlingMiddleware<TMessage>(
                     LoggerFactory.CreateLogger<ResilientErrorHandlingMiddleware<TMessage>>(),
-                    TimeSpan.FromSeconds(1)),
-                new DeadQueueMiddleware<TMessage>(LoggerFactory.CreateLogger<DeadQueueMiddleware<TMessage>>())
+                    TimeSpan.FromSeconds(1))
             };
         }
 
