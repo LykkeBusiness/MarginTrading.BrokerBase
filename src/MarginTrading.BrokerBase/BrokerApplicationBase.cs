@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Common;
-using Common.Log;
-using JetBrains.Annotations;
 using Lykke.MarginTrading.BrokerBase.Extensions;
 using Lykke.MarginTrading.BrokerBase.Models;
 using Lykke.MarginTrading.BrokerBase.Settings;
@@ -17,23 +13,22 @@ using Lykke.RabbitMqBroker.Subscriber.Deserializers;
 using Lykke.RabbitMqBroker.Subscriber.MessageReadStrategies;
 using Lykke.RabbitMqBroker.Subscriber.Middleware;
 using Lykke.RabbitMqBroker.Subscriber.Middleware.ErrorHandling;
-using Lykke.SlackNotifications;
 using Lykke.Snow.Common.Correlation.RabbitMq;
 using Microsoft.Extensions.Logging;
+using Serilog;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Lykke.MarginTrading.BrokerBase
 {
-    [UsedImplicitly]
     public abstract class BrokerApplicationBase<TMessage> : IBrokerApplication
     {
         private readonly RabbitMqCorrelationManager _correlationManager;
         protected readonly ILoggerFactory LoggerFactory;
-        protected readonly ILog Logger;
-        private readonly ISlackNotificationsSender _slackNotificationsSender;
         protected readonly CurrentApplicationInfo ApplicationInfo;
         private readonly ConcurrentDictionary<int, IStartStop> _subscribers = new ConcurrentDictionary<int, IStartStop>();
         protected readonly IMessageDeserializer<TMessage> MessageDeserializer;
         protected readonly IRabbitMqSerializer<TMessage> MessageSerializer;
+        protected readonly ILogger Logger;
 
         protected abstract BrokerSettingsBase Settings { get; }
         protected abstract string ExchangeName { get; }
@@ -42,22 +37,24 @@ namespace Lykke.MarginTrading.BrokerBase
         
         protected DateTime LastMessageTime { get; private set; }
 
-        protected BrokerApplicationBase(RabbitMqCorrelationManager correlationManager, ILoggerFactory loggerFactory, ILog logger, ISlackNotificationsSender slackNotificationsSender,
-            CurrentApplicationInfo applicationInfo, MessageFormat messageFormat = MessageFormat.Json)
+        protected BrokerApplicationBase(RabbitMqCorrelationManager correlationManager,
+            ILoggerFactory loggerFactory,
+            ILogger logger,
+            CurrentApplicationInfo applicationInfo,
+            MessageFormat messageFormat = MessageFormat.Json)
         {
             _correlationManager = correlationManager;
             LoggerFactory = loggerFactory;
             Logger = logger;
-            _slackNotificationsSender = slackNotificationsSender;
             ApplicationInfo = applicationInfo;
             MessageDeserializer = messageFormat == MessageFormat.Json
                 ? new JsonMessageDeserializer<TMessage>()
-                : (IMessageDeserializer<TMessage>) new MessagePackMessageDeserializer<TMessage>();
+                : (IMessageDeserializer<TMessage>)new MessagePackMessageDeserializer<TMessage>();
             MessageSerializer = messageFormat == MessageFormat.Json
                 ? new JsonMessageSerializer<TMessage>()
-                : (IRabbitMqSerializer<TMessage>) new MessagePackMessageSerializer<TMessage>();
+                : (IRabbitMqSerializer<TMessage>)new MessagePackMessageSerializer<TMessage>();
         }
-        
+
         public RabbitMqSubscriptionSettings GetRabbitMqSubscriptionSettings()
         {
             var settings = new RabbitMqSubscriptionSettings
@@ -94,13 +91,12 @@ namespace Lykke.MarginTrading.BrokerBase
         /// By default the pipeline is ResilientErrorHandlingStrategy (1 sec, 5 times) followed by DeadQueueErrorHandlingStrategy.
         /// Override if own strategy required.
         /// </summary>
-        [UsedImplicitly]
-        protected virtual IEnumerable<IEventMiddleware<TMessage>> GetMiddlewares<TMessage>(RabbitMqSubscriptionSettings settings)
+        protected virtual IEnumerable<IEventMiddleware<TMessage>> GetMiddlewares(RabbitMqSubscriptionSettings settings)
         {
-            return GetDefaultMiddlewares<TMessage>(settings);
+            return GetDefaultMiddlewares(settings);
         }
 
-        protected IEnumerable<IEventMiddleware<TMessage>> GetDefaultMiddlewares<TMessage>(RabbitMqSubscriptionSettings settings)
+        protected IEnumerable<IEventMiddleware<TMessage>> GetDefaultMiddlewares(RabbitMqSubscriptionSettings settings)
         {
             return new List<IEventMiddleware<TMessage>>
             {
@@ -113,7 +109,7 @@ namespace Lykke.MarginTrading.BrokerBase
 
         public virtual void Run()
         {
-            WriteInfoToLogAndSlack("Starting listening exchange " + ExchangeName);
+            Logger.LogInformation("Starting listening exchange {ExchangeName}", ExchangeName);
 
             try
             {
@@ -122,7 +118,8 @@ namespace Lykke.MarginTrading.BrokerBase
 
                 foreach (var consumerNumber in Enumerable.Range(1, consumerCount))
                 {
-                    var rabbitMqSubscriber = BuildSubscriber(subscriptionSettings, HandleMessage, HandleMessageWithThrottling);
+                    var rabbitMqSubscriber =
+                        BuildSubscriber(subscriptionSettings, HandleMessage, HandleMessageWithThrottling);
 
                     if (!_subscribers.TryAdd(consumerNumber, rabbitMqSubscriber))
                     {
@@ -132,13 +129,12 @@ namespace Lykke.MarginTrading.BrokerBase
 
                     rabbitMqSubscriber.Start();
                 }
-
-                WriteInfoToLogAndSlack("Broker listening queue " + subscriptionSettings.QueueName);
+                
+                Log.Information("Broker listening queue {QueueName}", subscriptionSettings.QueueName);
             }
             catch (Exception ex)
             {
-                Logger.WriteErrorAsync(ApplicationInfo.ApplicationFullName, "Application.RunAsync", null, ex).GetAwaiter()
-                    .GetResult();
+                Logger.LogError(ex, "Error while starting subscribers");
             }
         }
 
@@ -155,7 +151,7 @@ namespace Lykke.MarginTrading.BrokerBase
                 ? throttlingHandler(msg)
                 : basicHandler(msg));
             
-            foreach (var middleware in GetMiddlewares<TMessage>(subscriptionSettings))
+            foreach (var middleware in GetMiddlewares(subscriptionSettings))
             {
                 result = result.UseMiddleware(middleware);
             }
@@ -166,7 +162,7 @@ namespace Lykke.MarginTrading.BrokerBase
         public void StopApplication()
         {
             Console.WriteLine($"Closing {ApplicationInfo.ApplicationFullName}...");
-            WriteInfoToLogAndSlack("Stopping listening exchange " + ExchangeName);
+            Logger.LogInformation("Stopping listening exchange {ExchangeName}", ExchangeName);
             foreach (var subscriber in _subscribers.Values)
             {
                 subscriber.Stop();
@@ -180,22 +176,15 @@ namespace Lykke.MarginTrading.BrokerBase
             {
                 message = MessageDeserializer.Deserialize(serializedMessage);
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                Logger.WriteErrorAsync(this.GetType().Name, nameof(RepackMessage),
-                    $"Failed to deserialize the message: {serializedMessage} with {MessageDeserializer.GetType().Name}. Stopping.", 
-                    exception).GetAwaiter().GetResult();
+                Logger.LogError(
+                    "Failed to deserialize the message: {SerializedMessage} with {MessageDeserializerName}, stopping",
+                    serializedMessage, MessageDeserializer.GetType().Name);
                 return null;
             }
 
             return MessageSerializer.Serialize(message);
-        }
-
-        protected void WriteInfoToLogAndSlack(string infoMessage)
-        {
-            Logger.WriteInfo(ApplicationInfo.ApplicationFullName, null, infoMessage);
-            _slackNotificationsSender.SendAsync(ChannelTypes.MarginTrading, ApplicationInfo.ApplicationFullName,
-                infoMessage);
         }
     }
 }

@@ -1,10 +1,8 @@
-﻿using JetBrains.Annotations;
-using Lykke.MarginTrading.BrokerBase.Models;
+﻿using Lykke.MarginTrading.BrokerBase.Models;
 using Lykke.SettingsReader.Attributes;
 
 namespace Lykke.MarginTrading.BrokerBase.Settings
 {
-    [UsedImplicitly]
     public class BrokersLogsSettings
     {
         [Optional] 
