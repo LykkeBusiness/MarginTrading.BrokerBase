@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using Autofac;
-using Lykke.Common.ApiLibrary.Middleware;
+using Lykke.Common.Api.Contract.Responses;
 using Lykke.Common.ApiLibrary.Swagger;
+using Lykke.Common.ApiLibrary.Middleware;
 using Lykke.Logs.Serilog;
 using Lykke.MarginTrading.BrokerBase.Extensions;
 using Lykke.MarginTrading.BrokerBase.Services;
@@ -104,7 +105,7 @@ namespace Lykke.MarginTrading.BrokerBase
 #if DEBUG
             app.UseLykkeMiddleware(PlatformServices.Default.Application.ApplicationName, ex => ex.ToString(), false);
 #else
-            app.UseLykkeMiddleware(PlatformServices.Default.Application.ApplicationName, ex => new ErrorResponse {ErrorMessage = ex.Message});
+            app.UseLykkeMiddleware(PlatformServices.Default.Application.ApplicationName, ex => new ErrorResponse {ErrorMessage = ex.Message}, false, false);
 #endif
 
             app.UseRouting();
