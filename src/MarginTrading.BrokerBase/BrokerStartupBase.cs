@@ -2,8 +2,8 @@
 using System.IO;
 using Autofac;
 using Lykke.Common.Api.Contract.Responses;
-using Lykke.Common.ApiLibrary.Swagger;
 using Lykke.Common.ApiLibrary.Middleware;
+using Lykke.Common.ApiLibrary.Swagger;
 using Lykke.Logs.Serilog;
 using Lykke.MarginTrading.BrokerBase.Extensions;
 using Lykke.MarginTrading.BrokerBase.Services;
@@ -102,10 +102,13 @@ namespace Lykke.MarginTrading.BrokerBase
         public virtual void Configure(IApplicationBuilder app, IHostEnvironment env, IHostApplicationLifetime appLifetime)
         {
             app.UseCorrelation();
+            
 #if DEBUG
-            app.UseLykkeMiddleware(PlatformServices.Default.Application.ApplicationName, ex => ex.ToString(), false);
+            app.UseLykkeMiddleware(PlatformServices.Default.Application.ApplicationName, ex => ex.ToString(),
+                logClientErrors: false, useStandardLogger: true);
 #else
-            app.UseLykkeMiddleware(PlatformServices.Default.Application.ApplicationName, ex => new ErrorResponse {ErrorMessage = ex.Message}, false, false);
+            app.UseLykkeMiddleware(PlatformServices.Default.Application.ApplicationName,
+                ex => new ErrorResponse { ErrorMessage = ex.Message }, logClientErrors: false, useStandardLogger: true);
 #endif
 
             app.UseRouting();
