@@ -138,11 +138,11 @@ namespace Lykke.MarginTrading.BrokerBase
             }
         }
 
-        private RabbitMqSubscriber<TMessage> BuildSubscriber(RabbitMqSubscriptionSettings subscriptionSettings,
+        private RabbitMqPullingSubscriber<TMessage> BuildSubscriber(RabbitMqSubscriptionSettings subscriptionSettings,
             Func<TMessage, Task> basicHandler, Func<TMessage, Task> throttlingHandler)
         {
-            var result = new RabbitMqSubscriber<TMessage>(
-                LoggerFactory.CreateLogger<RabbitMqSubscriber<TMessage>>(),
+            var result = new RabbitMqPullingSubscriber<TMessage>(
+                LoggerFactory.CreateLogger<RabbitMqPullingSubscriber<TMessage>>(),
                 subscriptionSettings)
             .SetMessageDeserializer(MessageDeserializer)
             .SetMessageReadStrategy(new MessageReadWithTemporaryQueueStrategy(RoutingKey ?? ""))
