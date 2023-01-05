@@ -83,7 +83,7 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
                 var consumer = new EventingBasicConsumer(subscriptionChannel);
                 consumer.Received += (ch, ea) =>
                 {
-                    var message = _brokerApplication.RepackMessage(ea.Body);
+                    var message = _brokerApplication.RepackMessage(ea.Body.ToArray());
 
                     if (message != null)
                     {
@@ -93,7 +93,7 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
                             if (!string.IsNullOrEmpty(_brokerApplication.RoutingKey) ||
                                 ea.BasicProperties?.Headers?.Count > 0)
                             {
-                                properties = new BasicProperties();
+                                properties = new BrokerBasicProperties();
                                 if (!string.IsNullOrEmpty(_brokerApplication.RoutingKey))
                                 {
                                     properties.Type = _brokerApplication.RoutingKey;
