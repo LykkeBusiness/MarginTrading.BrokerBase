@@ -1,9 +1,11 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using System.Threading;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 
 namespace Lykke.MarginTrading.BrokerBase
 {
@@ -14,21 +16,42 @@ namespace Lykke.MarginTrading.BrokerBase
             void RunHost()
             {
                 Hosting.AppHost = Host.CreateDefaultBuilder()
-                        .UseServiceProviderFactory(new AutofacServiceProviderFactory())
-                        .ConfigureWebHostDefaults(webBuilder =>
-                        {
-                            webBuilder.ConfigureKestrel(serverOptions =>
-                                {
-                                    // Set properties and call methods on options
-                                })
-                                .UseStartup<TStartup>()
-                                .UseUrls("http://*:" + listeningPort)
-                                .UseContentRoot(Directory.GetCurrentDirectory());
-                        })
-                        .Build();
+                    .UseServiceProviderFactory(new AutofacServiceProviderFactory())
+                    .UseSerilog((context, cfg) =>
+                    {
+                        var a = Assembly.GetEntryAssembly();
+                        var title =
+                            a.GetCustomAttribute<AssemblyTitleAttribute>()?.Title ??
+                            string.Empty;
+                        var version =
+                            a.GetCustomAttribute<
+                                    AssemblyInformationalVersionAttribute>()
+                                ?.InformationalVersion ?? string.Empty;
+                        var environment =
+                            Environment.GetEnvironmentVariable(
+                                "ASPNETCORE_ENVIRONMENT") ?? string.Empty;
+
+                        cfg.ReadFrom.Configuration(context.Configuration)
+                            .Enrich.WithProperty("Application", title)
+                            .Enrich.WithProperty("Version", version)
+                            .Enrich.WithProperty("Environment", environment);
+                    })
+                    .ConfigureWebHostDefaults(webBuilder =>
+                    {
+                        webBuilder.ConfigureKestrel(serverOptions =>
+                            {
+                                // Set properties and call methods on options
+                            })
+                            .UseStartup<TStartup>()
+                            .UseUrls("http://*:" + listeningPort)
+                            .UseContentRoot(Directory.GetCurrentDirectory());
+                    })
+                    .Build();
 
                 Hosting.AppHost.Run();
-            };
+            }
+
+            ;
 
 
             StartWithRetries(RunHost);
