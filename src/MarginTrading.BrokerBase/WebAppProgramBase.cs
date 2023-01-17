@@ -3,7 +3,9 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using Autofac.Extensions.DependencyInjection;
+using Lykke.Logs.Serilog;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 
@@ -17,6 +19,17 @@ namespace Lykke.MarginTrading.BrokerBase
             {
                 Hosting.AppHost = Host.CreateDefaultBuilder()
                     .UseServiceProviderFactory(new AutofacServiceProviderFactory())
+                    .ConfigureAppConfiguration((context, builder) =>
+                    {
+                        var c = new ConfigurationBuilder()
+                            .SetBasePath(Directory.GetCurrentDirectory())
+                            .AddDevJson(context.HostingEnvironment)
+                            .AddSerilogJson(context.HostingEnvironment)
+                            .AddEnvironmentVariables()
+                            .Build();
+
+                        builder.AddConfiguration(c);
+                    })
                     .UseSerilog((context, cfg) =>
                     {
                         var a = Assembly.GetEntryAssembly();
@@ -50,9 +63,6 @@ namespace Lykke.MarginTrading.BrokerBase
 
                 Hosting.AppHost.Run();
             }
-
-            ;
-
 
             StartWithRetries(RunHost);
         }
