@@ -26,25 +26,19 @@ using Newtonsoft.Json.Serialization;
 
 namespace Lykke.MarginTrading.BrokerBase
 {
-    public abstract class  BrokerStartupBase<TApplicationSettings, TSettings>
+    public abstract class BrokerStartupBase<TApplicationSettings, TSettings>
         where TApplicationSettings : class, IBrokerApplicationSettings<TSettings>
         where TSettings : BrokerSettingsBase
     {
         protected IReloadingManager<TApplicationSettings> _appSettings;
-        public IConfigurationRoot Configuration { get; }
+        public IConfiguration Configuration { get; }
         public IHostEnvironment Environment { get; }
         protected abstract string ApplicationName { get; }
 
-        protected BrokerStartupBase(IHostEnvironment env)
+        protected BrokerStartupBase(IHostEnvironment env, IConfiguration configuration)
         {
-            Configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddDevJson(env)
-                .AddSerilogJson(env)
-                .AddEnvironmentVariables()
-                .Build();
-
             Environment = env;
+            Configuration = configuration;
         }
 
         public virtual void ConfigureServices(IServiceCollection services)
@@ -56,7 +50,7 @@ namespace Lykke.MarginTrading.BrokerBase
                 {
                     options.SerializerSettings.ContractResolver = new DefaultContractResolver();
                 });
-            
+
             services.AddSingleton(Configuration);
 
             _appSettings = Configuration.LoadSettings<TApplicationSettings>(
@@ -68,12 +62,13 @@ namespace Lykke.MarginTrading.BrokerBase
                     {
                         settings.Env = Configuration["Env"];
                     }
+
                     SetSettingValues(settings, Configuration);
                     return s;
                 });
 
             var clientSettings = new ClientSettings
-            { ApiKey = _appSettings.CurrentValue.MtBrokerSettings.ApiKey };
+                {ApiKey = _appSettings.CurrentValue.MtBrokerSettings.ApiKey};
 
             services.AddApiKeyAuth(clientSettings);
 
@@ -94,15 +89,16 @@ namespace Lykke.MarginTrading.BrokerBase
             services.AddTransient<HttpCorrelationHandler>();
         }
 
-        protected virtual void SetSettingValues(TSettings source, IConfigurationRoot configuration)
+        protected virtual void SetSettingValues(TSettings source, IConfiguration configuration)
         {
             //if needed TSetting properties may be set
         }
 
-        public virtual void Configure(IApplicationBuilder app, IHostEnvironment env, IHostApplicationLifetime appLifetime)
+        public virtual void Configure(IApplicationBuilder app, IHostEnvironment env,
+            IHostApplicationLifetime appLifetime)
         {
             app.UseCorrelation();
-            
+
 #if DEBUG
             app.UseLykkeMiddleware(PlatformServices.Default.Application.ApplicationName, ex => ex.ToString(),
                 logClientErrors: false, useStandardLogger: true);
@@ -114,15 +110,13 @@ namespace Lykke.MarginTrading.BrokerBase
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
             app.UseSwagger(c =>
             {
                 c.PreSerializeFilters.Add((swagger, httpReq) =>
-                    swagger.Servers = new List<OpenApiServer> {
-                        new OpenApiServer { Url = $"{httpReq.Scheme}://{httpReq.Host.Value}" }
+                    swagger.Servers = new List<OpenApiServer>
+                    {
+                        new OpenApiServer {Url = $"{httpReq.Scheme}://{httpReq.Host.Value}"}
                     });
             });
             app.UseSwaggerUI(a => a.SwaggerEndpoint("/swagger/v1/swagger.json", $"{ApplicationName} Swagger"));
@@ -158,9 +152,9 @@ namespace Lykke.MarginTrading.BrokerBase
             var settings = _appSettings.Nested(s => s.MtBrokerSettings);
             builder.RegisterInstance(settings).AsSelf().SingleInstance();
             builder.RegisterInstance(settings.CurrentValue).As<BrokerSettingsBase>().AsSelf().SingleInstance();
-            
+
             builder.RegisterType<RabbitPoisonHandingService>().As<IRabbitPoisonHandingService>().SingleInstance();
-            
+
             RegisterCustomServices(builder, settings);
         }
     }
