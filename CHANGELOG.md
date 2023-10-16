@@ -1,4 +1,4 @@
-## [[tbd]] - 2023-08-04
+## 7.0.6 - 2023-08-04
 LT-5041: Update RabbitMqBroker NuGet package
 
 ## 7.0.5 - 2023-08-04
