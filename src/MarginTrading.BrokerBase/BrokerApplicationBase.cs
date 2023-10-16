@@ -151,7 +151,7 @@ namespace Lykke.MarginTrading.BrokerBase
             var result = new RabbitMqSubscriber<TMessage>(
                 LoggerFactory.CreateLogger<RabbitMqSubscriber<TMessage>>(),
                 subscriptionSettings,
-                GetConnection(subscriptionSettings.ConnectionString, false))
+                GetConnection(subscriptionSettings.ConnectionString))
             .SetMessageDeserializer(MessageDeserializer)
             .SetMessageReadStrategy(new MessageReadWithTemporaryQueueStrategy(RoutingKey ?? ""))
             .SetReadHeadersAction(_correlationManager.FetchCorrelationIfExists)
@@ -201,7 +201,7 @@ namespace Lykke.MarginTrading.BrokerBase
         
         #region Connection establishment
 
-        private IAutorecoveringConnection GetConnection(string connectionString, bool reuse = true)
+        private IAutorecoveringConnection GetConnection(string connectionString)
         {
             Connection = CreateConnection(connectionString);
 
