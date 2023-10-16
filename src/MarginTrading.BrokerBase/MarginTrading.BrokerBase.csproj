@@ -3,7 +3,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>Lykke.MarginTrading.BrokerBase</AssemblyName>
     <RootNamespace>Lykke.MarginTrading.BrokerBase</RootNamespace>
-    <Version>1.0.1</Version>
+    <Version>7.0.5</Version>
     <LangVersion>8.0</LangVersion>
     <AspNetCoreHostingModel>OutOfProcess</AspNetCoreHostingModel>
     <AspNetCoreModuleName>AspNetCoreModuleV2</AspNetCoreModuleName>
@@ -16,7 +16,7 @@
     <PackageReference Include="LykkeBiz.Common.ApiLibrary" Version="4.2.4" />
     <PackageReference Include="LykkeBiz.Logs.MsSql" Version="3.0.0" />
     <PackageReference Include="LykkeBiz.Logs.Serilog" Version="3.3.1" />
-    <PackageReference Include="LykkeBiz.RabbitMqBroker" Version="11.2.1" />
+    <PackageReference Include="LykkeBiz.RabbitMqBroker" Version="11.12.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.12" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="5.4.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.4.0" />
