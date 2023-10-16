@@ -40,7 +40,8 @@ namespace Lykke.MarginTrading.BrokerBase
         
         protected DateTime LastMessageTime { get; private set; }
 
-        private IAutorecoveringConnection Connection;
+        private readonly ConcurrentDictionary<string, IAutorecoveringConnection> Connections =
+            new ConcurrentDictionary<string, IAutorecoveringConnection>();
         
         private const int PrefetchCount = 200;
         
@@ -151,7 +152,7 @@ namespace Lykke.MarginTrading.BrokerBase
             var result = new RabbitMqSubscriber<TMessage>(
                 LoggerFactory.CreateLogger<RabbitMqSubscriber<TMessage>>(),
                 subscriptionSettings,
-                GetConnection(subscriptionSettings.ConnectionString))
+                GetConnection(subscriptionSettings.ConnectionString, false))
             .SetMessageDeserializer(MessageDeserializer)
             .SetMessageReadStrategy(new MessageReadWithTemporaryQueueStrategy(RoutingKey ?? ""))
             .SetReadHeadersAction(_correlationManager.FetchCorrelationIfExists)
@@ -177,8 +178,11 @@ namespace Lykke.MarginTrading.BrokerBase
                 subscriber.Stop();
             }
             
-            DetachConnectionEventHandlers(Connection);
-            Connection.Dispose();
+            foreach (var connection in Connections.Values)
+            {
+                DetachConnectionEventHandlers(connection);
+                connection.Dispose();
+            }
         }
         
         public byte[] RepackMessage(byte[] serializedMessage)
@@ -201,13 +205,24 @@ namespace Lykke.MarginTrading.BrokerBase
         
         #region Connection establishment
 
-        private IAutorecoveringConnection GetConnection(string connectionString)
+        private IAutorecoveringConnection GetConnection(string connectionString, bool reuse = true)
         {
-            Connection = CreateConnection(connectionString);
+            var exists = Connections.TryGetValue(connectionString, out var connection);
+            if (exists && reuse)
+                return connection;
 
-            AttachConnectionEventHandlers(Connection);
+            connection = CreateConnection(connectionString);
+
+            var key = exists ? Guid.NewGuid().ToString("N") : connectionString;
+            if (!Connections.TryAdd(key, connection))
+            {
+                key = Guid.NewGuid().ToString("N");
+                Connections.TryAdd(key, connection);
+            }
             
-            return Connection;
+            AttachConnectionEventHandlers(connection);
+            
+            return connection;
         }
 
         private IAutorecoveringConnection CreateConnection(string connectionString)
