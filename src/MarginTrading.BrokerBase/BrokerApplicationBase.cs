@@ -40,8 +40,7 @@ namespace Lykke.MarginTrading.BrokerBase
         
         protected DateTime LastMessageTime { get; private set; }
 
-        private readonly ConcurrentDictionary<string, IAutorecoveringConnection> Connections =
-            new ConcurrentDictionary<string, IAutorecoveringConnection>();
+        private IAutorecoveringConnection Connection;
         
         private const int PrefetchCount = 200;
         
@@ -178,11 +177,8 @@ namespace Lykke.MarginTrading.BrokerBase
                 subscriber.Stop();
             }
             
-            foreach (var connection in Connections.Values)
-            {
-                DetachConnectionEventHandlers(connection);
-                connection.Dispose();
-            }
+            DetachConnectionEventHandlers(Connection);
+            Connection.Dispose();
         }
         
         public byte[] RepackMessage(byte[] serializedMessage)
@@ -207,22 +203,11 @@ namespace Lykke.MarginTrading.BrokerBase
 
         private IAutorecoveringConnection GetConnection(string connectionString, bool reuse = true)
         {
-            var exists = Connections.TryGetValue(connectionString, out var connection);
-            if (exists && reuse)
-                return connection;
+            Connection = CreateConnection(connectionString);
 
-            connection = CreateConnection(connectionString);
-
-            var key = exists ? Guid.NewGuid().ToString("N") : connectionString;
-            if (!Connections.TryAdd(key, connection))
-            {
-                key = Guid.NewGuid().ToString("N");
-                Connections.TryAdd(key, connection);
-            }
+            AttachConnectionEventHandlers(Connection);
             
-            AttachConnectionEventHandlers(connection);
-            
-            return connection;
+            return Connection;
         }
 
         private IAutorecoveringConnection CreateConnection(string connectionString)
