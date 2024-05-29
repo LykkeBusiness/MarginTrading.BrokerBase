@@ -11,13 +11,13 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
-    <PackageReference Include="Lykke.Snow.Common" Version="3.0.0" />
-    <PackageReference Include="Lykke.Snow.Common.Startup" Version="3.10.0" />
-    <PackageReference Include="LykkeBiz.Common.ApiLibrary" Version="4.2.4" />
-    <PackageReference Include="LykkeBiz.Logs.MsSql" Version="3.0.0" />
-    <PackageReference Include="LykkeBiz.Logs.Serilog" Version="3.3.1" />
-    <PackageReference Include="LykkeBiz.RabbitMqBroker" Version="11.12.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.12" />
+    <PackageReference Include="Lykke.Snow.Common" Version="3.0.26" />
+    <PackageReference Include="Lykke.Snow.Common.Startup" Version="3.15.0" />
+    <PackageReference Include="LykkeBiz.Common.ApiLibrary" Version="4.2.5" />
+    <PackageReference Include="LykkeBiz.Logs.MsSql" Version="3.1.0" />
+    <PackageReference Include="LykkeBiz.Logs.Serilog" Version="3.3.3" />
+    <PackageReference Include="LykkeBiz.RabbitMqBroker" Version="13.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.31" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="5.4.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.4.0" />
   </ItemGroup>
