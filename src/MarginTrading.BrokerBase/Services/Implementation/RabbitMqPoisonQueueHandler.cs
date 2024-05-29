@@ -162,8 +162,7 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
         {
             foreach (var channel in _channels)
             {
-                channel?.Close();
-                channel?.Dispose();
+                channel.Dispose();
             }
             
             _logger.LogInformation("Channels disposed");
