@@ -52,11 +52,11 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
                     _rabbitMqSubscriptionSettings.ExchangeName);
                 var publishingChannel = connection.CreateModel();
                 var subscriptionChannel = connection.CreateModel();
-                _channels.AddRange(new[] {publishingChannel, subscriptionChannel});
+                _channels.AddRange(new[] { publishingChannel, subscriptionChannel });
 
                 var publishingArgs = new Dictionary<string, object>()
                 {
-                    {"x-dead-letter-exchange", _rabbitMqSubscriptionSettings.DeadLetterExchangeName}
+                    { "x-dead-letter-exchange", _rabbitMqSubscriptionSettings.DeadLetterExchangeName }
                 };
 
                 subscriptionChannel.QueueDeclare(PoisonQueueName,
@@ -69,13 +69,14 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
                 if (messagesFound == 0)
                 {
                     result = "No messages found in poison queue. Terminating the process";
-                    
+
                     _logger.LogWarning(result);
                     FreeResources();
                     return result;
                 }
 
-                _logger.LogInformation("{MessagesCount} messages found in poison queue. Starting the process", messagesFound);
+                _logger.LogInformation("{MessagesCount} messages found in poison queue. Starting the process",
+                    messagesFound);
 
                 publishingChannel.QueueDeclare(_rabbitMqSubscriptionSettings.QueueName,
                     _rabbitMqSubscriptionSettings.IsDurable, false, false, publishingArgs);
@@ -98,6 +99,7 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
                                 {
                                     properties.Type = _brokerApplication.RoutingKey;
                                 }
+
                                 if (ea.BasicProperties?.Headers?.Count > 0)
                                 {
                                     properties.Headers = ea.BasicProperties.Headers;
@@ -120,7 +122,7 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
 
                 var sw = new Stopwatch();
                 sw.Start();
-                
+
                 var tag = subscriptionChannel.BasicConsume(PoisonQueueName, false,
                     consumer);
 
@@ -150,6 +152,10 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
                 _logger.LogError(exception, result);
                 return result;
             }
+            finally
+            {
+                _semaphoreSlim.Release();
+            }
         }
 
         private void FreeResources()
@@ -159,8 +165,6 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
                 channel?.Close();
                 channel?.Dispose();
             }
-            
-            _semaphoreSlim.Release();
             
             _logger.LogInformation("Channels disposed");
         }
