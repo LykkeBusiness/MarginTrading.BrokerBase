@@ -1,4 +1,4 @@
-## [[tbd]] - 2024-05-29
+## 8.0.0 - 2024-05-29
 
 ### Changed
 - LT-5509: Update RabbitMQ broker library with new RabbitMQ.Client and templates
