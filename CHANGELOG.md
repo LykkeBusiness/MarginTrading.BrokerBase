@@ -1,3 +1,8 @@
+## [[tbd]] - 2024-05-29
+
+### Changed
+- LT-5509: Objects disposal fixed in `RabbitMqPoisonQueueHandler`
+
 ## 8.0.1 - 2024-05-29
 
 ### Changed
