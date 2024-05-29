@@ -9,17 +9,17 @@ namespace Lykke.MarginTrading.BrokerBase.Controllers
     [Route("api/[controller]")]
     public class PoisonController : Controller
     {
-        private readonly IRabbitPoisonHandingService _rabbitPoisonHandingService;
+        private readonly IRabbitMqPoisonQueueHandler _rabbitMqPoisonQueueHandler;
         
-        public PoisonController(IRabbitPoisonHandingService rabbitPoisonHandingService)
+        public PoisonController(IRabbitMqPoisonQueueHandler rabbitMqPoisonQueueHandler)
         {
-            _rabbitPoisonHandingService = rabbitPoisonHandingService;
+            _rabbitMqPoisonQueueHandler = rabbitMqPoisonQueueHandler;
         }
 
         [HttpPost("put-messages-back")]
         public async Task<string> PutMessagesBack()
         {
-            return await _rabbitPoisonHandingService.PutMessagesBack();
+            return await _rabbitMqPoisonQueueHandler.PutMessagesBack();
         }
     }
 }
