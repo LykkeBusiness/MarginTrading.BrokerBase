@@ -1,3 +1,8 @@
+## [[tbd]] - 2024-05-30
+
+### Changed
+- LT-5509: Switch to template-based RabbiMQ subscribers
+
 ## 8.0.2 - 2024-05-29
 
 ### Changed
