@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Lykke.MarginTrading.BrokerBase.Extensions;
-using Lykke.MarginTrading.BrokerBase.Models;
+using Lykke.MarginTrading.BrokerBase.Messaging;
 using Lykke.MarginTrading.BrokerBase.Settings;
 using Lykke.RabbitMqBroker;
 using Lykke.RabbitMqBroker.Publisher.Serializers;
@@ -24,13 +24,13 @@ namespace Lykke.MarginTrading.BrokerBase
     public abstract class BrokerApplicationBase<TMessage> : IBrokerApplication
     {
         private readonly RabbitMqCorrelationManager _correlationManager;
-        protected readonly ILoggerFactory LoggerFactory;
-        protected readonly CurrentApplicationInfo ApplicationInfo;
         private readonly ConcurrentDictionary<int, IStartStop> _subscribers = new ConcurrentDictionary<int, IStartStop>();
+        private readonly IMessagingComponentFactory<TMessage> _messagingComponentFactory;
+        
         protected readonly IMessageDeserializer<TMessage> MessageDeserializer;
         protected readonly IRabbitMqSerializer<TMessage> MessageSerializer;
-        private readonly MessageFormat _messageFormat;
-        protected readonly IConnectionProvider _connectionProvider;
+        protected readonly CurrentApplicationInfo ApplicationInfo;
+        protected readonly ILoggerFactory LoggerFactory;
         protected readonly ILogger Logger;
 
         protected abstract BrokerSettingsBase Settings { get; }
@@ -44,23 +44,17 @@ namespace Lykke.MarginTrading.BrokerBase
         
         protected BrokerApplicationBase(RabbitMqCorrelationManager correlationManager,
             ILoggerFactory loggerFactory,
-            ILogger logger,
             CurrentApplicationInfo applicationInfo,
-            IConnectionProvider connectionProvider,
-            MessageFormat messageFormat = MessageFormat.Json)
+            IMessagingComponentFactory<TMessage> messagingComponentFactory)
         {
-            _correlationManager = correlationManager;
-            LoggerFactory = loggerFactory;
-            Logger = logger;
-            ApplicationInfo = applicationInfo;
-            _connectionProvider = connectionProvider;
-            _messageFormat = messageFormat;
-            MessageDeserializer = _messageFormat == MessageFormat.Json
-                ? new JsonMessageDeserializer<TMessage>()
-                : (IMessageDeserializer<TMessage>)new MessagePackMessageDeserializer<TMessage>();
-            MessageSerializer = _messageFormat == MessageFormat.Json
-                ? new JsonMessageSerializer<TMessage>()
-                : (IRabbitMqSerializer<TMessage>)new MessagePackMessageSerializer<TMessage>();
+            _correlationManager = correlationManager ?? throw new ArgumentNullException(nameof(correlationManager));
+            ApplicationInfo = applicationInfo ?? throw new ArgumentNullException(nameof(applicationInfo));
+            _messagingComponentFactory = messagingComponentFactory ??
+                                         throw new ArgumentNullException(nameof(messagingComponentFactory));
+            MessageDeserializer = _messagingComponentFactory.CreateDeserializer();
+            MessageSerializer = _messagingComponentFactory.CreateSerializer();
+            LoggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
+            Logger = loggerFactory.CreateLogger<BrokerApplicationBase<TMessage>>();
         }
 
         public RabbitMqSubscriptionSettings GetRabbitMqSubscriptionSettings()
@@ -151,31 +145,23 @@ namespace Lykke.MarginTrading.BrokerBase
             Func<TMessage, Task> basicHandler,
             Func<TMessage, Task> throttlingHandler)
         {
-            var connection = _connectionProvider.GetOrCreateShared(subscriptionSettings.ConnectionString);
-            var subscriber = _messageFormat switch
-            {
-                MessageFormat.Json => RabbitMqSubscriber<TMessage>.Json.CreateNoLossSubscriber(
-                    subscriptionSettings,
-                    connection,
-                    LoggerFactory
-                ),
-                MessageFormat.MessagePack => RabbitMqSubscriber<TMessage>.MessagePack.CreateNoLossSubscriber(
-                    subscriptionSettings,
-                    connection,
-                    LoggerFactory),
-                _ => throw new InvalidOperationException($"Unsupported message format: {_messageFormat}")
-            };
+            var subscriber = _messagingComponentFactory.CreateSubscriber(
+                subscriptionSettings,
+                s =>
+                {
+                    s.SetReadHeadersAction(_correlationManager.FetchCorrelationIfExists)
+                        .SetPrefetchCount(PrefetchCount)
+                        .Subscribe(
+                            msg => Settings.ThrottlingRateThreshold.HasValue
+                                ? throttlingHandler(msg)
+                                : basicHandler(msg));
 
-            subscriber.SetReadHeadersAction(_correlationManager.FetchCorrelationIfExists)
-                .SetPrefetchCount(PrefetchCount)
-                .Subscribe(msg => Settings.ThrottlingRateThreshold.HasValue
-                    ? throttlingHandler(msg)
-                    : basicHandler(msg));
 
-            foreach (var middleware in GetMiddlewares(subscriptionSettings))
-            {
-                subscriber = subscriber.UseMiddleware(middleware);
-            }
+                    foreach (var middleware in GetMiddlewares(subscriptionSettings))
+                    {
+                        s.UseMiddleware(middleware);
+                    }
+                });
 
             return subscriber;
         }
