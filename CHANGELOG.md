@@ -1,3 +1,8 @@
+## [[tbd]] - 2024-06-04
+
+### Fixed
+- LT-5509: Register dlx exchange and queue if configured when creating a new RabbitMQ subscriber from template.
+
 ## 8.1.0 - 2024-05-30
 
 ### Changed
