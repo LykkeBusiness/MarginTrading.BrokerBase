@@ -1,4 +1,4 @@
-## [[tbd]] - 2024-06-07
+## 8.2.0 - 2024-06-07
 
 ### Added
 - LT-5509: RabbitMqBroker library version is now a part of connection display name
