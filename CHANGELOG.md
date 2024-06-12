@@ -1,3 +1,8 @@
+## [[tbd]] - 2024-06-12
+
+### Added
+- LT-5509: Rabbit MQ listeners can be registered without autostart.
+
 ## 8.2.0 - 2024-06-07
 
 ### Added
