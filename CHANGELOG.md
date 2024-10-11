@@ -1,3 +1,8 @@
+## [[tbd]] - 2024-10-11
+
+### Added
+- LT-5787: Add assembly load logger
+
 ## 8.4.0 - 2024-09-26
 
 ### Changed

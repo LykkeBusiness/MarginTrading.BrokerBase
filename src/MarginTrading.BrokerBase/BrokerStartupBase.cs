@@ -12,6 +12,7 @@ using Lykke.MarginTrading.BrokerBase.Services.Implementation;
 using Lykke.MarginTrading.BrokerBase.Settings;
 using Lykke.RabbitMqBroker;
 using Lykke.SettingsReader;
+using Lykke.Snow.Common.AssemblyLogging;
 using Lykke.Snow.Common.Correlation;
 using Lykke.Snow.Common.Correlation.Cqrs;
 using Lykke.Snow.Common.Correlation.Http;
@@ -45,6 +46,7 @@ namespace Lykke.MarginTrading.BrokerBase
 
         public virtual void ConfigureServices(IServiceCollection services)
         {
+            services.AddAssemblyLogger();
             services
                 .AddControllers()
                 .AddApplicationPart(typeof(Hosting).Assembly)
@@ -127,6 +129,9 @@ namespace Lykke.MarginTrading.BrokerBase
 
             appLifetime.ApplicationStarted.Register(() =>
             {
+                app.ApplicationServices.GetRequiredService<AssemblyLogger>()
+                    .StartLogging();
+                
                 foreach (var application in applications)
                 {
                     application.Run();
