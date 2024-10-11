@@ -14,5 +14,11 @@ namespace Lykke.MarginTrading.BrokerBase.Extensions
         {
             return $"{exchangeName}.dlx";
         }
+        
+        public static string BuildDeadLetterQueueName(string queueName, string postfix = "")
+        {
+            postfix = string.IsNullOrEmpty(postfix) ? "poison" : postfix;
+            return $"{queueName}-{postfix}";
+        }
     }
 }

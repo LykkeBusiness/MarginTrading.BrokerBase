@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using Autofac;
+using JetBrains.Annotations;
 using Lykke.Common.Api.Contract.Responses;
 using Lykke.Common.ApiLibrary.Middleware;
 using Lykke.Common.ApiLibrary.Swagger;
@@ -9,7 +10,9 @@ using Lykke.MarginTrading.BrokerBase.Extensions;
 using Lykke.MarginTrading.BrokerBase.Services;
 using Lykke.MarginTrading.BrokerBase.Services.Implementation;
 using Lykke.MarginTrading.BrokerBase.Settings;
+using Lykke.RabbitMqBroker;
 using Lykke.SettingsReader;
+using Lykke.Snow.Common.AssemblyLogging;
 using Lykke.Snow.Common.Correlation;
 using Lykke.Snow.Common.Correlation.Cqrs;
 using Lykke.Snow.Common.Correlation.Http;
@@ -43,6 +46,7 @@ namespace Lykke.MarginTrading.BrokerBase
 
         public virtual void ConfigureServices(IServiceCollection services)
         {
+            services.AddAssemblyLogger();
             services
                 .AddControllers()
                 .AddApplicationPart(typeof(Hosting).Assembly)
@@ -125,6 +129,9 @@ namespace Lykke.MarginTrading.BrokerBase
 
             appLifetime.ApplicationStarted.Register(() =>
             {
+                app.ApplicationServices.GetRequiredService<AssemblyLogger>()
+                    .StartLogging();
+                
                 foreach (var application in applications)
                 {
                     application.Run();
@@ -142,6 +149,7 @@ namespace Lykke.MarginTrading.BrokerBase
 
         protected abstract void RegisterCustomServices(ContainerBuilder builder, IReloadingManager<TSettings> settings);
 
+        [UsedImplicitly]
         public void ConfigureContainer(ContainerBuilder builder)
         {
             builder.RegisterInstance(this).AsSelf().SingleInstance();
@@ -153,7 +161,8 @@ namespace Lykke.MarginTrading.BrokerBase
             builder.RegisterInstance(settings).AsSelf().SingleInstance();
             builder.RegisterInstance(settings.CurrentValue).As<BrokerSettingsBase>().AsSelf().SingleInstance();
 
-            builder.RegisterType<RabbitPoisonHandingService>().As<IRabbitPoisonHandingService>().SingleInstance();
+            builder.AddRabbitMqConnectionProvider();
+            builder.RegisterType<RabbitMqPoisonQueueHandler>().As<IRabbitMqPoisonQueueHandler>().SingleInstance();
 
             RegisterCustomServices(builder, settings);
         }

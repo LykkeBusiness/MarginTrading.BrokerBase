@@ -3,36 +3,39 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Lykke.MarginTrading.BrokerBase.Extensions;
 using Lykke.MarginTrading.BrokerBase.Settings;
 using Lykke.RabbitMqBroker;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using RabbitMQ.Client.Framing;
 
 namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
 {
-    public class RabbitPoisonHandingService : IRabbitPoisonHandingService, IDisposable
+    public class RabbitMqPoisonQueueHandler : IRabbitMqPoisonQueueHandler, IDisposable
     {
-        private readonly BrokerSettingsBase _brokerSettingsBase;
+        private readonly string _connectionString;
         private readonly IBrokerApplication _brokerApplication;
         private readonly RabbitMqSubscriptionSettings _rabbitMqSubscriptionSettings;
         private readonly List<IModel> _channels = new List<IModel>();
-        private IConnection _connection;
         private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
+        private readonly IConnectionProvider _connectionProvider;
         private readonly ILogger _logger;
 
-        private string PoisonQueueName => $"{_rabbitMqSubscriptionSettings.QueueName}-poison";
+        private string PoisonQueueName => QueueHelper.BuildDeadLetterQueueName(_rabbitMqSubscriptionSettings.QueueName);
 
-        public RabbitPoisonHandingService(BrokerSettingsBase brokerSettingsBase, 
-            IBrokerApplication brokerApplication, ILogger<RabbitPoisonHandingService> logger)
+        public RabbitMqPoisonQueueHandler(BrokerSettingsBase brokerSettingsBase,
+                                          IBrokerApplication brokerApplication,
+                                          IConnectionProvider connectionProvider,
+                                          ILogger<RabbitMqPoisonQueueHandler> logger)
         {
-            _brokerSettingsBase = brokerSettingsBase;
+            _connectionString = brokerSettingsBase.MtRabbitMqConnString;
             _brokerApplication = brokerApplication;
             _rabbitMqSubscriptionSettings = brokerApplication.GetRabbitMqSubscriptionSettings();
             _logger = logger;
+            _connectionProvider = connectionProvider;
         }
-        
+
         public async Task<string> PutMessagesBack()
         {
             if (_semaphoreSlim.CurrentCount == 0)
@@ -44,19 +47,16 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
 
             try
             {
-                var factory = new ConnectionFactory {Uri = new Uri(_brokerSettingsBase.MtRabbitMqConnString, UriKind.Absolute)};
-                _logger.LogInformation("Trying to connect to {Endpoint} ({ExchangeName})", factory.Endpoint,
+                var connection = _connectionProvider.GetExclusive(_connectionString);
+                _logger.LogInformation("Trying to connect to {Endpoint} ({ExchangeName})", connection.Endpoint,
                     _rabbitMqSubscriptionSettings.ExchangeName);
-
-                _connection = factory.CreateConnection();
-
-                var publishingChannel = _connection.CreateModel();
-                var subscriptionChannel = _connection.CreateModel();
-                _channels.AddRange(new[] {publishingChannel, subscriptionChannel});
+                var publishingChannel = connection.CreateModel();
+                var subscriptionChannel = connection.CreateModel();
+                _channels.AddRange(new[] { publishingChannel, subscriptionChannel });
 
                 var publishingArgs = new Dictionary<string, object>()
                 {
-                    {"x-dead-letter-exchange", _rabbitMqSubscriptionSettings.DeadLetterExchangeName}
+                    { "x-dead-letter-exchange", _rabbitMqSubscriptionSettings.DeadLetterExchangeName }
                 };
 
                 subscriptionChannel.QueueDeclare(PoisonQueueName,
@@ -69,13 +69,14 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
                 if (messagesFound == 0)
                 {
                     result = "No messages found in poison queue. Terminating the process";
-                    
+
                     _logger.LogWarning(result);
                     FreeResources();
                     return result;
                 }
 
-                _logger.LogInformation("{MessagesCount} messages found in poison queue. Starting the process", messagesFound);
+                _logger.LogInformation("{MessagesCount} messages found in poison queue. Starting the process",
+                    messagesFound);
 
                 publishingChannel.QueueDeclare(_rabbitMqSubscriptionSettings.QueueName,
                     _rabbitMqSubscriptionSettings.IsDurable, false, false, publishingArgs);
@@ -98,6 +99,7 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
                                 {
                                     properties.Type = _brokerApplication.RoutingKey;
                                 }
+
                                 if (ea.BasicProperties?.Headers?.Count > 0)
                                 {
                                     properties.Headers = ea.BasicProperties.Headers;
@@ -120,7 +122,7 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
 
                 var sw = new Stopwatch();
                 sw.Start();
-                
+
                 var tag = subscriptionChannel.BasicConsume(PoisonQueueName, false,
                     consumer);
 
@@ -146,9 +148,13 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
             catch (Exception exception)
             {
                 var result =
-                    $"Exception [{exception.Message}] thrown while putting messages back from poison to queue {_rabbitMqSubscriptionSettings.QueueName}. Stopping the process.";
+                    $"Exception [{exception.Message}] thrown while putting messages back from poison queue {PoisonQueueName} to queue {_rabbitMqSubscriptionSettings.QueueName}. Stopping the process.";
                 _logger.LogError(exception, result);
                 return result;
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
             }
         }
 
@@ -156,15 +162,10 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
         {
             foreach (var channel in _channels)
             {
-                channel?.Close();
-                channel?.Dispose();
+                channel.Dispose();
             }
-            _connection?.Close();
-            _connection?.Dispose();
             
-            _semaphoreSlim.Release();
-            
-            _logger.LogInformation("Channels and connection disposed");
+            _logger.LogInformation("Channels disposed");
         }
 
         public void Dispose()

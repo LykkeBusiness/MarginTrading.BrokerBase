@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 
 namespace Lykke.MarginTrading.BrokerBase.Services
 {
-    public interface IRabbitPoisonHandingService
+    public interface IRabbitMqPoisonQueueHandler
     {
         Task<string> PutMessagesBack();
     }
