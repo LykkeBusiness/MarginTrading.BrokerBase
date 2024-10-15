@@ -129,9 +129,6 @@ namespace Lykke.MarginTrading.BrokerBase
 
             appLifetime.ApplicationStarted.Register(() =>
             {
-                app.ApplicationServices.GetRequiredService<AssemblyLogger>()
-                    .StartLogging();
-                
                 foreach (var application in applications)
                 {
                     application.Run();

@@ -1,3 +1,8 @@
+## [[tbd]] - 2024-10-15
+
+### Added
+- LT-5787: Switch assembly logging to hosted service
+
 ## 8.5.0 - 2024-10-11
 
 ### Added
