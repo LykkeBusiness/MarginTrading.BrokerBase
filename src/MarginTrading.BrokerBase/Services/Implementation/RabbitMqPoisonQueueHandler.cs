@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Lykke.MarginTrading.BrokerBase.Extensions;
 using Lykke.MarginTrading.BrokerBase.Settings;
 using Lykke.RabbitMqBroker;
+
 using Microsoft.Extensions.Logging;
+
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -21,6 +24,7 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
         private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
         private readonly IConnectionProvider _connectionProvider;
         private readonly ILogger _logger;
+        private IAutorecoveringConnection _connection;
 
         private string PoisonQueueName => QueueHelper.BuildDeadLetterQueueName(_rabbitMqSubscriptionSettings.QueueName);
 
@@ -47,41 +51,31 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
 
             try
             {
-                var connection = _connectionProvider.GetExclusive(_connectionString);
-                _logger.LogInformation("Trying to connect to {Endpoint} ({ExchangeName})", connection.Endpoint,
+                _connection = _connectionProvider.GetExclusive(_connectionString);
+                _logger.LogInformation("Trying to connect to {Endpoint} ({ExchangeName})", _connection.Endpoint,
                     _rabbitMqSubscriptionSettings.ExchangeName);
-                var publishingChannel = connection.CreateModel();
-                var subscriptionChannel = connection.CreateModel();
-                _channels.AddRange(new[] { publishingChannel, subscriptionChannel });
+                var originalQueueChannel = _connection.CreateModel();
+                var poisonQueueChannel = _connection.CreateModel();
+                _channels.AddRange([originalQueueChannel, poisonQueueChannel]);
+                var queueDeclareOk = poisonQueueChannel.QueueDeclarePassive(PoisonQueueName);
 
-                var publishingArgs = new Dictionary<string, object>()
-                {
-                    { "x-dead-letter-exchange", _rabbitMqSubscriptionSettings.DeadLetterExchangeName }
-                };
-
-                subscriptionChannel.QueueDeclare(PoisonQueueName,
-                    _rabbitMqSubscriptionSettings.IsDurable, false, false, null);
-
-                var messagesFound = subscriptionChannel.MessageCount(PoisonQueueName);
                 var processedMessages = 0;
                 string result;
 
-                if (messagesFound == 0)
+                if (queueDeclareOk.MessageCount == 0)
                 {
                     result = "No messages found in poison queue. Terminating the process";
 
                     _logger.LogWarning(result);
-                    FreeResources();
                     return result;
                 }
 
                 _logger.LogInformation("{MessagesCount} messages found in poison queue. Starting the process",
-                    messagesFound);
+                    queueDeclareOk.MessageCount);
 
-                publishingChannel.QueueDeclare(_rabbitMqSubscriptionSettings.QueueName,
-                    _rabbitMqSubscriptionSettings.IsDurable, false, false, publishingArgs);
+                originalQueueChannel.QueueDeclarePassive(_rabbitMqSubscriptionSettings.QueueName);
 
-                var consumer = new EventingBasicConsumer(subscriptionChannel);
+                var consumer = new EventingBasicConsumer(poisonQueueChannel);
                 consumer.Received += (ch, ea) =>
                 {
                     var message = _brokerApplication.RepackMessage(ea.Body.ToArray());
@@ -106,10 +100,10 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
                                 }
                             }
 
-                            publishingChannel.BasicPublish(_rabbitMqSubscriptionSettings.ExchangeName,
+                            originalQueueChannel.BasicPublish(_rabbitMqSubscriptionSettings.ExchangeName,
                                 _brokerApplication.RoutingKey ?? "", properties, message);
 
-                            subscriptionChannel.BasicAck(ea.DeliveryTag, false);
+                            poisonQueueChannel.BasicAck(ea.DeliveryTag, false);
 
                             processedMessages++;
                         }
@@ -123,12 +117,12 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
                 var sw = new Stopwatch();
                 sw.Start();
 
-                var tag = subscriptionChannel.BasicConsume(PoisonQueueName, false,
+                var tag = poisonQueueChannel.BasicConsume(PoisonQueueName, false,
                     consumer);
 
                 _logger.LogInformation("Consumer {Tag} started", tag);
 
-                while (processedMessages < messagesFound)
+                while (processedMessages < queueDeclareOk.MessageCount)
                 {
                     Thread.Sleep(100);
 
@@ -140,9 +134,8 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
                 }
 
                 result =
-                    $"Messages resend finished. Initial number of messages {messagesFound}. Processed number of messages {processedMessages}";
+                    $"Messages resend finished. Initial number of messages {queueDeclareOk.MessageCount}. Processed number of messages {processedMessages}";
                 _logger.LogInformation(result);
-                FreeResources();
                 return result;
             }
             catch (Exception exception)
@@ -154,7 +147,7 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
             }
             finally
             {
-                _semaphoreSlim.Release();
+                FreeResources();
             }
         }
 
@@ -162,10 +155,14 @@ namespace Lykke.MarginTrading.BrokerBase.Services.Implementation
         {
             foreach (var channel in _channels)
             {
-                channel.Dispose();
+                channel?.Close();
+                channel?.Dispose();
             }
-            
-            _logger.LogInformation("Channels disposed");
+
+            _connection?.Close();
+            _connection.Dispose();
+
+            _semaphoreSlim?.Release();
         }
 
         public void Dispose()
