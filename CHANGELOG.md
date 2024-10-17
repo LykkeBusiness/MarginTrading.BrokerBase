@@ -1,3 +1,8 @@
+## [[tbd]] - 2024-10-17
+
+### Fixed
+- LT-5719: Poison queues handling when they of quorum type
+
 ## 8.6.0 - 2024-10-15
 
 ### Added

@@ -1,7 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+
 using Autofac;
+
 using JetBrains.Annotations;
+
 using Lykke.Common.Api.Contract.Responses;
 using Lykke.Common.ApiLibrary.Middleware;
 using Lykke.Common.ApiLibrary.Swagger;
@@ -19,12 +22,14 @@ using Lykke.Snow.Common.Correlation.Http;
 using Lykke.Snow.Common.Correlation.RabbitMq;
 using Lykke.Snow.Common.Startup;
 using Lykke.Snow.Common.Startup.ApiKey;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.OpenApi.Models;
+
 using Newtonsoft.Json.Serialization;
 
 namespace Lykke.MarginTrading.BrokerBase
@@ -72,7 +77,7 @@ namespace Lykke.MarginTrading.BrokerBase
                 });
 
             var clientSettings = new ClientSettings
-                {ApiKey = _appSettings.CurrentValue.MtBrokerSettings.ApiKey};
+            { ApiKey = _appSettings.CurrentValue.MtBrokerSettings.ApiKey };
 
             services.AddApiKeyAuth(clientSettings);
 
@@ -159,7 +164,11 @@ namespace Lykke.MarginTrading.BrokerBase
             builder.RegisterInstance(settings.CurrentValue).As<BrokerSettingsBase>().AsSelf().SingleInstance();
 
             builder.AddRabbitMqConnectionProvider();
-            builder.RegisterType<RabbitMqPoisonQueueHandler>().As<IRabbitMqPoisonQueueHandler>().SingleInstance();
+            builder
+                .RegisterType<RabbitMqPoisonQueueHandler>()
+                .As<IRabbitMqPoisonQueueHandler>()
+                .SingleInstance();
+            builder.RegisterDecorator<ParallelExecutionGuardPoisonQueueDecorator, IRabbitMqPoisonQueueHandler>();
 
             RegisterCustomServices(builder, settings);
         }
