@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+
 using RabbitMQ.Client;
 
 namespace Lykke.MarginTrading.BrokerBase.Services.Implementation

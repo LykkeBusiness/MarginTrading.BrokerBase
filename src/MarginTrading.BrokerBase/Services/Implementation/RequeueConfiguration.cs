@@ -9,6 +9,6 @@ public record RequeueConfiguration(string PoisonQueueName, string ExchangeName, 
         ArgumentException.ThrowIfNullOrWhiteSpace(poisonQueueName, nameof(poisonQueueName));
         ArgumentException.ThrowIfNullOrWhiteSpace(exchangeName, nameof(exchangeName));
 
-        return new(poisonQueueName, exchangeName, routingKey);
+        return new(poisonQueueName, exchangeName, routingKey ?? string.Empty);
     }
 }
