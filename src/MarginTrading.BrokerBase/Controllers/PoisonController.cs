@@ -3,6 +3,7 @@ using System.Net;
 
 using Lykke.Common.Api.Contract.Responses;
 using Lykke.MarginTrading.BrokerBase.Services;
+using Lykke.MarginTrading.BrokerBase.Services.Implementation;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +39,16 @@ public class PoisonController : Controller
 
             _logger.LogInformation(result);
             return Ok(result);
+        }
+        catch (ProcessAlreadyStartedException ex)
+        {
+            _logger.LogError("Process already started: {Message}", ex.Message);
+            return StatusCode((int)HttpStatusCode.Conflict, ErrorResponse.Create("Process already started"));
+        }
+        catch (FailedToAcqLockException ex)
+        {
+            _logger.LogError("Failed to acquire lock: {Message}", ex.Message);
+            return StatusCode((int)HttpStatusCode.Conflict, ErrorResponse.Create("Failed to acquire lock"));
         }
         catch (Exception ex)
         {
