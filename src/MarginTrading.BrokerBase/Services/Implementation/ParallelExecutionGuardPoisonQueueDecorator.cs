@@ -1,6 +1,5 @@
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Lykke.MarginTrading.BrokerBase.Services.Implementation;
 
@@ -15,5 +14,5 @@ internal sealed class ParallelExecutionGuardPoisonQueueDecorator : IRabbitMqPois
         _decoratee = decoratee ?? throw new ArgumentNullException(nameof(decoratee));
     }
 
-    public Task<string> PutMessagesBack() => _lock.Execute(_decoratee.PutMessagesBack, _timeout);
+    public string TryPutMessagesBack() => _lock.Execute(_decoratee.TryPutMessagesBack, _timeout);
 }
