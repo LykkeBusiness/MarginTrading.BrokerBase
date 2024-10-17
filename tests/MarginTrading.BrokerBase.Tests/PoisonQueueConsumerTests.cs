@@ -6,7 +6,7 @@ using RabbitMQ.Client;
 
 public sealed class PoisonQueueConsumerTests
 {
-    [Fact]
+    [Fact(Skip = "Manual test")]
     public void Should_Process_Messages()
     {
         var factory = new ConnectionFactory
