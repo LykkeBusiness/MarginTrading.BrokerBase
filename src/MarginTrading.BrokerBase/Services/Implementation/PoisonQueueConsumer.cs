@@ -52,12 +52,13 @@ public class PoisonQueueConsumer(IModel channel, RequeueConfiguration configurat
 
         if (!string.IsNullOrEmpty(configuration.RoutingKey))
         {
-            properties = new BrokerBasicProperties { Type = configuration.RoutingKey };
+            properties = channel.CreateBasicProperties();
+            properties.Type = configuration.RoutingKey;
         }
 
         if (source?.Headers?.Count > 0)
         {
-            properties ??= new BrokerBasicProperties();
+            properties ??= channel.CreateBasicProperties();
             properties.Headers = source.Headers;
         }
 
