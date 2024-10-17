@@ -1,4 +1,4 @@
-## [[tbd]] - 2024-10-17
+## 8.6.2 - 2024-10-17
 
 ### Fixed
 - LT-5719: Routing key if null causes exception
