@@ -1,19 +1,17 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 
 using Autofac;
 
 using JetBrains.Annotations;
 
-using Lykke.Common.Api.Contract.Responses;
+
 using Lykke.Common.ApiLibrary.Middleware;
 using Lykke.Common.ApiLibrary.Swagger;
-using Lykke.Logs.Serilog;
 using Lykke.MarginTrading.BrokerBase.Extensions;
-using Lykke.MarginTrading.BrokerBase.Services;
-using Lykke.MarginTrading.BrokerBase.Services.Implementation;
 using Lykke.MarginTrading.BrokerBase.Settings;
 using Lykke.RabbitMqBroker;
+using Lykke.RabbitMqBroker.Subscriber;
+using Lykke.RabbitMqBroker.Subscriber.MessageReadStrategies;
 using Lykke.SettingsReader;
 using Lykke.Snow.Common.AssemblyLogging;
 using Lykke.Snow.Common.Correlation;
@@ -164,11 +162,21 @@ namespace Lykke.MarginTrading.BrokerBase
             builder.RegisterInstance(settings.CurrentValue).As<BrokerSettingsBase>().AsSelf().SingleInstance();
 
             builder.AddRabbitMqConnectionProvider();
-            builder
-                .RegisterType<RabbitMqPoisonQueueHandler>()
-                .As<IRabbitMqPoisonQueueHandler>()
-                .SingleInstance();
-            builder.RegisterDecorator<ParallelExecutionGuardPoisonQueueDecorator, IRabbitMqPoisonQueueHandler>();
+
+            builder.Register(ctx =>
+            {
+                var subscriptionSettings = ctx.Resolve<IBrokerApplication>().GetRabbitMqSubscriptionSettings();
+                var routingKey = ctx.Resolve<IBrokerApplication>().RoutingKey;
+
+                return new PoisonQueueHandler(
+                    settings.CurrentValue.MtRabbitMqConnString,
+                    ctx.Resolve<IConnectionProvider>(),
+                    PoisonQueueConsumerConfigurationOptions.Create(
+                        PoisonQueueName.Create(subscriptionSettings.QueueName),
+                        ExchangeName.Create(subscriptionSettings.ExchangeName),
+                        RoutingKey.Create(routingKey)));
+            });
+            builder.RegisterDecorator<ParallelExecutionGuardPoisonQueueDecorator, IPoisonQueueHandler>();
 
             RegisterCustomServices(builder, settings);
         }

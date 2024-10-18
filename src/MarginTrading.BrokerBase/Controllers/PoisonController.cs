@@ -2,8 +2,7 @@ using System;
 using System.Net;
 
 using Lykke.Common.Api.Contract.Responses;
-using Lykke.MarginTrading.BrokerBase.Services;
-using Lykke.MarginTrading.BrokerBase.Services.Implementation;
+using Lykke.RabbitMqBroker;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,12 +14,12 @@ namespace Lykke.MarginTrading.BrokerBase.Controllers;
 [Route("api/[controller]")]
 public class PoisonController : Controller
 {
-    private readonly IRabbitMqPoisonQueueHandler _rabbitMqPoisonQueueHandler;
+    private readonly IPoisonQueueHandler _poisonQueueHandler;
     private readonly ILogger<PoisonController> _logger;
 
-    public PoisonController(IRabbitMqPoisonQueueHandler rabbitMqPoisonQueueHandler, ILogger<PoisonController> logger)
+    public PoisonController(IPoisonQueueHandler poisonQueueHandler, ILogger<PoisonController> logger)
     {
-        _rabbitMqPoisonQueueHandler = rabbitMqPoisonQueueHandler;
+        _poisonQueueHandler = poisonQueueHandler;
         _logger = logger;
     }
 
@@ -29,7 +28,7 @@ public class PoisonController : Controller
     {
         try
         {
-            var result = _rabbitMqPoisonQueueHandler.TryPutMessagesBack();
+            var result = _poisonQueueHandler.TryPutMessagesBack();
 
             if (string.IsNullOrEmpty(result))
             {
@@ -45,9 +44,9 @@ public class PoisonController : Controller
             _logger.LogError("Process already started: {Message}", ex.Message);
             return StatusCode((int)HttpStatusCode.Conflict, ErrorResponse.Create("Process already started"));
         }
-        catch (FailedToAcqLockException ex)
+        catch (LockAcqTimeoutException ex)
         {
-            _logger.LogError("Failed to acquire lock: {Message}", ex.Message);
+            _logger.LogError("Failed to acquire lock within timeout: {Message}", ex.Message);
             return StatusCode((int)HttpStatusCode.Conflict, ErrorResponse.Create("Failed to acquire lock"));
         }
         catch (Exception ex)
