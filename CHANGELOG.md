@@ -1,4 +1,4 @@
-## [[tbd]] - 2024-10-17
+## 8.6.4 - 2024-10-17
 
 ### Fixed
 - LT-5719: Avoid using custom basic properties when publishing messages
