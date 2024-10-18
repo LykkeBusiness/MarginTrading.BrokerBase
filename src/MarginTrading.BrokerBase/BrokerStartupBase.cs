@@ -4,6 +4,7 @@ using Autofac;
 
 using JetBrains.Annotations;
 
+using Lykke.Common.Api.Contract.Responses;
 
 using Lykke.Common.ApiLibrary.Middleware;
 using Lykke.Common.ApiLibrary.Swagger;
