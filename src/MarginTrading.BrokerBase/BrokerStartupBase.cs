@@ -26,6 +26,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.OpenApi.Models;
 
@@ -175,7 +176,8 @@ namespace Lykke.MarginTrading.BrokerBase
                     PoisonQueueConsumerConfigurationOptions.Create(
                         PoisonQueueName.Create(subscriptionSettings.QueueName),
                         ExchangeName.Create(subscriptionSettings.ExchangeName),
-                        RoutingKey.Create(routingKey)));
+                        RoutingKey.Create(routingKey)),
+                    ctx.Resolve<ILoggerFactory>());
             });
             builder.RegisterDecorator<ParallelExecutionGuardPoisonQueueDecorator, IPoisonQueueHandler>();
 
