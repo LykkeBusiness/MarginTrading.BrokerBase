@@ -1,4 +1,4 @@
-## [[tbd]] - 2024-10-21
+## 8.6.5 - 2024-10-21
 
 ### Fixed
 - LT-5719: Reuse poison queue handler from Lykke.RabbitMqBroker
