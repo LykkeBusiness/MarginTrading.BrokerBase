@@ -1,4 +1,4 @@
-## [[tbd]] - 2024-10-21
+## 8.7.0 - 2024-10-21
 
 ### Changed
 - LT-5719: bump Lykke.RabbitMqBroker -> 15.4.0
