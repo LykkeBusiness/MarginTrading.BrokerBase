@@ -1,3 +1,8 @@
+## [[tbd]] - [[date]]
+
+### Changed
+- LT-5858: Update Lykke core packages
+
 ## 8.7.0 - 2024-10-21
 
 ### Changed
