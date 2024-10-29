@@ -165,20 +165,23 @@ namespace Lykke.MarginTrading.BrokerBase
 
             builder.AddRabbitMqConnectionProvider();
 
-            builder.Register(ctx =>
-            {
-                var subscriptionSettings = ctx.Resolve<IBrokerApplication>().GetRabbitMqSubscriptionSettings();
-                var routingKey = ctx.Resolve<IBrokerApplication>().RoutingKey;
+            builder.Register(
+                    ctx =>
+                    {
+                        var subscriptionSettings = ctx.Resolve<IBrokerApplication>().GetRabbitMqSubscriptionSettings();
+                        var routingKey = ctx.Resolve<IBrokerApplication>().RoutingKey;
 
-                return new PoisonQueueHandler(
-                    settings.CurrentValue.MtRabbitMqConnString,
-                    ctx.Resolve<IConnectionProvider>(),
-                    PoisonQueueConsumerConfigurationOptions.Create(
-                        PoisonQueueName.Create(subscriptionSettings.QueueName),
-                        ExchangeName.Create(subscriptionSettings.ExchangeName),
-                        RoutingKey.Create(routingKey)),
-                    ctx.Resolve<ILoggerFactory>());
-            });
+                        return new PoisonQueueHandler(
+                            settings.CurrentValue.MtRabbitMqConnString,
+                            ctx.Resolve<IConnectionProvider>(),
+                            PoisonQueueConsumerConfigurationOptions.Create(
+                                PoisonQueueName.Create(subscriptionSettings.QueueName),
+                                ExchangeName.Create(subscriptionSettings.ExchangeName),
+                                RoutingKey.Create(routingKey)),
+                            ctx.Resolve<ILoggerFactory>());
+                    })
+                .As<IPoisonQueueHandler>()
+                .SingleInstance();
             builder.RegisterDecorator<ParallelExecutionGuardPoisonQueueDecorator, IPoisonQueueHandler>();
 
             RegisterCustomServices(builder, settings);

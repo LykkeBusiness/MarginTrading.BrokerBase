@@ -1,3 +1,8 @@
+## [[tbd]] - [[date]]
+
+### Fixed
+- LT-5719: Register poison queue handler in DI
+
 ## 8.8.0 - 2024-10-28
 
 ### Changed
