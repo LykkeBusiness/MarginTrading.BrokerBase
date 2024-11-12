@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Threading;
 using Autofac.Extensions.DependencyInjection;
 using Lykke.Logs.Serilog;
+using Lykke.SettingsReader.ConfigurationProvider;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -13,7 +14,7 @@ namespace Lykke.MarginTrading.BrokerBase
 {
     public class WebAppProgramBase<TStartup> where TStartup : class
     {
-        protected static void RunOnPort(short listeningPort)
+        protected static void RunOnPort(short listeningPort, bool useSettingsService = false)
         {
             void RunHost()
             {
@@ -21,14 +22,16 @@ namespace Lykke.MarginTrading.BrokerBase
                     .UseServiceProviderFactory(new AutofacServiceProviderFactory())
                     .ConfigureAppConfiguration((context, builder) =>
                     {
-                        var c = new ConfigurationBuilder()
+                        var configurationBuilder = new ConfigurationBuilder()
                             .SetBasePath(Directory.GetCurrentDirectory())
                             .AddDevJson(context.HostingEnvironment)
                             .AddSerilogJson(context.HostingEnvironment)
-                            .AddEnvironmentVariables()
-                            .Build();
+                            .AddEnvironmentVariables();
 
-                        builder.AddConfiguration(c);
+                        if (useSettingsService)
+                            configurationBuilder.AddHttpSourceConfiguration();
+
+                        builder.AddConfiguration(configurationBuilder.Build());
                     })
                     .UseSerilog((context, cfg) =>
                     {
