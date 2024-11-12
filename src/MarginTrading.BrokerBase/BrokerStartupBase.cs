@@ -23,6 +23,7 @@ using Lykke.Snow.Common.Startup;
 using Lykke.Snow.Common.Startup.ApiKey;
 
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -119,7 +120,12 @@ namespace Lykke.MarginTrading.BrokerBase
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+            app.UseEndpoints(
+                endpoints =>
+                {
+                    endpoints.MapControllers();
+                    ConfigureEndpoints(endpoints);
+                });
             app.UseSwagger(c =>
             {
                 c.PreSerializeFilters.Add((swagger, httpReq) =>
@@ -150,6 +156,10 @@ namespace Lykke.MarginTrading.BrokerBase
         }
 
         protected abstract void RegisterCustomServices(ContainerBuilder builder, IReloadingManager<TSettings> settings);
+
+        protected virtual void ConfigureEndpoints(IEndpointRouteBuilder endpointRouteBuilder)
+        {
+        }
 
         [UsedImplicitly]
         public void ConfigureContainer(ContainerBuilder builder)
