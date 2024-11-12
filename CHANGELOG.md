@@ -1,4 +1,4 @@
-## [[tbd]] - [[date]]
+## 8.9.0 - 2024-11-12
 
 ### Added
 - LT-5904: ability to extend endpoints and use HttpSourceConfiguration when needed
