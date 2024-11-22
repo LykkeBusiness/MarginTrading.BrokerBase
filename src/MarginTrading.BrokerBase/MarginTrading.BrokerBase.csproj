@@ -12,7 +12,7 @@
   <ItemGroup>
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="Lykke.Snow.Common" Version="5.0.1" />
-    <PackageReference Include="Lykke.Snow.Common.Startup" Version="4.2.0" />
+    <PackageReference Include="Lykke.Snow.Common.Startup" Version="5.0.0" />
     <PackageReference Include="LykkeBiz.Common.ApiLibrary" Version="6.0.0" />
     <PackageReference Include="LykkeBiz.Logs.MsSql" Version="4.0.0" />
     <PackageReference Include="LykkeBiz.Logs.Serilog" Version="3.3.3" />
