@@ -1,16 +1,18 @@
 ﻿using System.Collections.Generic;
-using System.IO;
+
 using Autofac;
+
 using JetBrains.Annotations;
+
 using Lykke.Common.Api.Contract.Responses;
+
 using Lykke.Common.ApiLibrary.Middleware;
 using Lykke.Common.ApiLibrary.Swagger;
-using Lykke.Logs.Serilog;
 using Lykke.MarginTrading.BrokerBase.Extensions;
-using Lykke.MarginTrading.BrokerBase.Services;
-using Lykke.MarginTrading.BrokerBase.Services.Implementation;
 using Lykke.MarginTrading.BrokerBase.Settings;
 using Lykke.RabbitMqBroker;
+using Lykke.RabbitMqBroker.Subscriber;
+using Lykke.RabbitMqBroker.Subscriber.MessageReadStrategies;
 using Lykke.SettingsReader;
 using Lykke.Snow.Common.AssemblyLogging;
 using Lykke.Snow.Common.Correlation;
@@ -19,12 +21,16 @@ using Lykke.Snow.Common.Correlation.Http;
 using Lykke.Snow.Common.Correlation.RabbitMq;
 using Lykke.Snow.Common.Startup;
 using Lykke.Snow.Common.Startup.ApiKey;
+
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.OpenApi.Models;
+
 using Newtonsoft.Json.Serialization;
 
 namespace Lykke.MarginTrading.BrokerBase
@@ -72,7 +78,7 @@ namespace Lykke.MarginTrading.BrokerBase
                 });
 
             var clientSettings = new ClientSettings
-                {ApiKey = _appSettings.CurrentValue.MtBrokerSettings.ApiKey};
+            { ApiKey = _appSettings.CurrentValue.MtBrokerSettings.ApiKey };
 
             services.AddApiKeyAuth(clientSettings);
 
@@ -114,7 +120,12 @@ namespace Lykke.MarginTrading.BrokerBase
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+            app.UseEndpoints(
+                endpoints =>
+                {
+                    endpoints.MapControllers();
+                    ConfigureEndpoints(endpoints);
+                });
             app.UseSwagger(c =>
             {
                 c.PreSerializeFilters.Add((swagger, httpReq) =>
@@ -129,9 +140,6 @@ namespace Lykke.MarginTrading.BrokerBase
 
             appLifetime.ApplicationStarted.Register(() =>
             {
-                app.ApplicationServices.GetRequiredService<AssemblyLogger>()
-                    .StartLogging();
-                
                 foreach (var application in applications)
                 {
                     application.Run();
@@ -149,6 +157,10 @@ namespace Lykke.MarginTrading.BrokerBase
 
         protected abstract void RegisterCustomServices(ContainerBuilder builder, IReloadingManager<TSettings> settings);
 
+        protected virtual void ConfigureEndpoints(IEndpointRouteBuilder endpointRouteBuilder)
+        {
+        }
+
         [UsedImplicitly]
         public void ConfigureContainer(ContainerBuilder builder)
         {
@@ -162,7 +174,25 @@ namespace Lykke.MarginTrading.BrokerBase
             builder.RegisterInstance(settings.CurrentValue).As<BrokerSettingsBase>().AsSelf().SingleInstance();
 
             builder.AddRabbitMqConnectionProvider();
-            builder.RegisterType<RabbitMqPoisonQueueHandler>().As<IRabbitMqPoisonQueueHandler>().SingleInstance();
+
+            builder.Register(
+                    ctx =>
+                    {
+                        var subscriptionSettings = ctx.Resolve<IBrokerApplication>().GetRabbitMqSubscriptionSettings();
+                        var routingKey = ctx.Resolve<IBrokerApplication>().RoutingKey;
+
+                        return new PoisonQueueHandler(
+                            settings.CurrentValue.MtRabbitMqConnString,
+                            ctx.Resolve<IConnectionProvider>(),
+                            PoisonQueueConsumerConfigurationOptions.Create(
+                                PoisonQueueName.Create(subscriptionSettings.QueueName),
+                                ExchangeName.Create(subscriptionSettings.ExchangeName),
+                                RoutingKey.Create(routingKey)),
+                            ctx.Resolve<ILoggerFactory>());
+                    })
+                .As<IPoisonQueueHandler>()
+                .SingleInstance();
+            builder.RegisterDecorator<ParallelExecutionGuardPoisonQueueDecorator, IPoisonQueueHandler>();
 
             RegisterCustomServices(builder, settings);
         }

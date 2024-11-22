@@ -1,5 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# 
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarginTrading.BrokerBase", "src\MarginTrading.BrokerBase\MarginTrading.BrokerBase.csproj", "{6AF9283A-1C12-4ED5-9867-CC009A948B3D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D69790CB-19B6-4A48-B539-A0150A88EC84}"
@@ -8,8 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		LICENSE = LICENSE
 		README.md = README.md
 		global.json = global.json
-        .gitignore = .gitignore
-        .editorconfig = .editorconfig
+		.gitignore = .gitignore
+		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
 Global

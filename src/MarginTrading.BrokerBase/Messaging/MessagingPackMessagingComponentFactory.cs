@@ -24,7 +24,7 @@ namespace Lykke.MarginTrading.BrokerBase.Messaging
 
         public IMessageDeserializer<TMessage> CreateDeserializer() => new MessagePackMessageDeserializer<TMessage>();
 
-        public IRabbitMqSerializer<TMessage> CreateSerializer() => new MessagePackMessageSerializer<TMessage>();
+        public IRabbitMqSerializer<TMessage> CreateSerializer() => new MessagePackMessageSerializer<TMessage>(options: null);
 
         /// <summary>
         /// Creates a "no loss" subscriber with MessagePack message format.

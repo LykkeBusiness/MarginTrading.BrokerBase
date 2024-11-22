@@ -1,4 +1,54 @@
-## [[tbd]] - 2024-10-11
+## [[tbd]] - [[date]]
+
+### Changed
+- LT-5950: Update Refit to 8.x version
+
+## 8.9.0 - 2024-11-12
+
+### Added
+- LT-5904: ability to extend endpoints and use HttpSourceConfiguration when needed
+
+## 8.8.1 - 2024-10-29
+
+### Fixed
+- LT-5719: Register poison queue handler in DI
+
+## 8.8.0 - 2024-10-28
+
+### Changed
+- LT-5858: Update Lykke core packages
+
+## 8.7.0 - 2024-10-21
+
+### Changed
+- LT-5719: bump Lykke.RabbitMqBroker -> 15.4.0
+
+## 8.6.5 - 2024-10-21
+
+### Fixed
+- LT-5719: Reuse poison queue handler from Lykke.RabbitMqBroker
+
+## 8.6.4 - 2024-10-17
+
+### Fixed
+- LT-5719: Avoid using custom basic properties when publishing messages
+
+## 8.6.2 - 2024-10-17
+
+### Fixed
+- LT-5719: Routing key if null causes exception
+
+## 8.6.1 - 2024-10-17
+
+### Fixed
+- LT-5719: Poison queues handling when they of quorum type
+
+## 8.6.0 - 2024-10-15
+
+### Added
+- LT-5787: Switch assembly logging to hosted service
+
+## 8.5.0 - 2024-10-11
 
 ### Added
 - LT-5787: Add assembly load logger
