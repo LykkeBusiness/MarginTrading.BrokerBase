@@ -1,3 +1,8 @@
+## [[tbd]] - [[date]]
+
+### Changed
+- LT-5950: Update Refit to 8.x version
+
 ## 8.9.0 - 2024-11-12
 
 ### Added
