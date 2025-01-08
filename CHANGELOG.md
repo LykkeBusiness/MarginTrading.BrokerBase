@@ -1,4 +1,4 @@
-## [[tbd]] (2025-01-08)
+## 8.10.1 (2025-01-08)
 
 ### Changed
 - LT-5980: Subscriber tries to delete the queue when it is not connected to an exchange
