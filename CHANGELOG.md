@@ -1,3 +1,8 @@
+## [[tbd]] (2025-01-09)
+
+### Changed
+- LT-5980: update exception handling
+
 ## 8.10.1 (2025-01-08)
 
 ### Changed
