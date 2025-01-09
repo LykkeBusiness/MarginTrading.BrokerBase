@@ -136,8 +136,7 @@ namespace Lykke.MarginTrading.BrokerBase
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "Error while starting subscribers. Rethrowing.");
-                throw;
+                Logger.LogError(ex, "Error while starting subscribers");
             }
         }
 
