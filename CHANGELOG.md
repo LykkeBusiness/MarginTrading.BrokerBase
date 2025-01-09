@@ -1,3 +1,8 @@
+## [[tbd]] (2025-01-09)
+
+### Changed
+- LT-5980: bump RabbitMqBroker library
+
 ## 8.11.0 (2025-01-09)
 
 ### Changed
