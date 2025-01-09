@@ -3,7 +3,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>Lykke.MarginTrading.BrokerBase</AssemblyName>
     <RootNamespace>Lykke.MarginTrading.BrokerBase</RootNamespace>
-    <Version>8.11.0</Version>
+    <Version>8.11.1</Version>
     <AspNetCoreHostingModel>OutOfProcess</AspNetCoreHostingModel>
     <AspNetCoreModuleName>AspNetCoreModuleV2</AspNetCoreModuleName>
     <PackageId>LykkeBiz.MarginTrading.BrokerBase</PackageId>
