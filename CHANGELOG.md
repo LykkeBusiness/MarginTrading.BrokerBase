@@ -1,3 +1,18 @@
+## [[tbd]] (2025-01-09)
+
+### Changed
+- LT-5980: bump RabbitMqBroker library
+
+## 8.10.2 (2025-01-09)
+
+### Changed
+- LT-5980: update exception handling
+
+## 8.10.1 (2025-01-08)
+
+### Changed
+- LT-5980: Subscriber tries to delete the queue when it is not connected to an exchange
+
 ## 8.10.0 - 2024-11-22
 
 ### Changed
