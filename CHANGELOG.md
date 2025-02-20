@@ -1,4 +1,4 @@
-## [[TBD]] ([[DATE]])
+## 8.11.2 (2025-02-20)
 
 ### Changed
 - LT-6065: bump SettingsReader library, remove useSettingsReader parameter from RunOnPort method
