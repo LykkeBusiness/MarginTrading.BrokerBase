@@ -1,3 +1,8 @@
+## [[TBD]] ([[DATE]])
+
+### Changed
+- LT-6078: bump RabbitMqBroker library
+
 ## 8.11.3 (2025-02-20)
 
 ### Changed
